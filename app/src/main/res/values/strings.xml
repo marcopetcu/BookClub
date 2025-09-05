@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">BookClub</string>
+    <string name="hello_message">Hello there!</string>
+    <string name="login">Login</string>
+    <string name="go_to_register">Go To Register</string>
+    <string name="register">Register</string>
+    <string name="home">Home</string>
+</resources>
