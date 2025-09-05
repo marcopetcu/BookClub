@@ -24,6 +24,13 @@
             android:padding="@dimen/default_space"
             />
 
+        <Button
+            android:id="@+id/btn_register"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/register"
+            android:layout_margin="@dimen/default_space"/>
+
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

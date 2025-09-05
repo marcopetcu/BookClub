@@ -36,7 +36,7 @@ class LoginFragment: Fragment() {
     }
 
     private fun goToHome() {
-        val action = LoginFragmentDirections.actionLoginFragmentToHomeFragment()
+        val action = LoginFragmentDirections.actionLoginFragmentToNavigationHome()
         findNavController().navigate(action)
     }
 
