@@ -1,8 +1,24 @@
 <resources>
     <string name="app_name">BookClub</string>
     <string name="hello_message">Hello there!</string>
+
+    <!--    AUTHENTICATION-->
     <string name="login">Login</string>
     <string name="go_to_register">Go To Register</string>
     <string name="register">Register</string>
+    <string name="hint_write_your_email_here">Write your email here…</string>
+
+    <!-- HOME -->
     <string name="home">Home</string>
+
+    <!-- BOOKS -->
+    <string name="books">Books</string>
+
+    <!-- INBOX -->
+    <string name="inbox">Inbox</string>
+
+    <!-- PROFILE -->
+    <string name="profile">Profile</string>
+
+
 </resources>

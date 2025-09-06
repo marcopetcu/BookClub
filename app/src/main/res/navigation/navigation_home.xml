@@ -10,4 +10,23 @@
         android:name="com.example.bookclub.ui.home.HomeFragment"
         android:label="HomeFragment"
         tools:layout="@layout/fragment_home"/>
+
+    <fragment
+        android:id="@+id/booksFragment"
+        android:name="com.example.bookclub.ui.books.BooksFragment"
+        android:label="BooksFragment"
+        tools:layout="@layout/fragment_books"/>
+
+    <fragment
+        android:id="@+id/inboxFragment"
+        android:name="com.example.bookclub.ui.inbox.InboxFragment"
+        android:label="InboxFragment"
+        tools:layout="@layout/fragment_inbox"/>
+
+    <fragment
+        android:id="@+id/profileFragment"
+        android:name="com.example.bookclub.ui.profile.ProfileFragment"
+        android:label="ProfileFragment"
+        tools:layout="@layout/fragment_profile"/>
+
 </navigation>

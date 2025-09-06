@@ -28,6 +28,10 @@
         android:name="com.example.bookclub.ui.register.RegisterFragment"
         android:label="RegisterFragment"
         tools:layout="@layout/fragment_register">
+        <argument
+            app:nullable="false"
+            android:name="email"
+            app:argType="string" />
         <action
             android:id="@+id/action_registerFragment_to_navigation_home"
             app:popUpTo="@id/navigation_authentication"

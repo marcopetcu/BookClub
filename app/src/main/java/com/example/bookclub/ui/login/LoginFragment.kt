@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.EditText
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.example.bookclub.R
@@ -22,7 +23,8 @@ class LoginFragment: Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         view.findViewById<TextView>(R.id.tv_register).setOnClickListener {
-            goToRegister()
+            val email = view.findViewById<EditText>(R.id.edt_email).text.toString()
+            goToRegister(email)
         }
 
         view.findViewById<Button>(R.id.btn_login).setOnClickListener {
@@ -30,8 +32,8 @@ class LoginFragment: Fragment() {
         }
     }
 
-    private fun goToRegister() {
-        val action = LoginFragmentDirections.actionLoginFragmentToRegisterFragment()
+    private fun goToRegister(email: String) {
+        val action = LoginFragmentDirections.actionLoginFragmentToRegisterFragment(email)
         findNavController().navigate(action)
     }
 
