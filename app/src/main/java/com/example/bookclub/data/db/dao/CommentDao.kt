@@ -14,4 +14,7 @@ interface CommentDao {
 
     @Query("SELECT * FROM comment WHERE parentId = :parentId ORDER BY createdAt ASC")
     fun getReplies(parentId: Long): Flow<List<CommentEntity>>
+
+    @Query("SELECT * FROM comment WHERE id = :id")
+    suspend fun getById(id: Long): com.example.bookclub.data.db.CommentEntity?
 }

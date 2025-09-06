@@ -24,4 +24,17 @@ interface BookClubDao {
 
     @Query("SELECT * FROM bookclub WHERE id = :id")
     suspend fun getById(id: Long): BookClubEntity?
+
+    @Query("""
+    SELECT bc.* FROM bookclub bc
+    JOIN follow_book fb ON fb.workId = bc.workId
+    WHERE fb.userId = :userId AND bc.status IN (:s1, :s2)
+    ORDER BY bc.startAt ASC
+    """)
+    fun listForFollowedBooks(
+        userId: Long,
+        s1: com.example.bookclub.data.model.ClubStatus = com.example.bookclub.data.model.ClubStatus.SCHEDULED,
+        s2: com.example.bookclub.data.model.ClubStatus = com.example.bookclub.data.model.ClubStatus.LIVE
+    ): kotlinx.coroutines.flow.Flow<List<com.example.bookclub.data.db.BookClubEntity>>
+
 }

@@ -12,6 +12,10 @@ constraintlayout = "2.2.1"
 navigation = "2.9.3"
 room = "2.7.2"
 ksp = "2.2.10-2.0.2"
+retrofit = "3.0.0"
+moshi = "1.15.2"
+okhttp = "5.1.0"
+coil="2.7.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -28,6 +32,11 @@ androidx-navigation-ui = { group = "androidx.navigation", name = "navigation-ui-
 room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
 room-ktx     = { group = "androidx.room", name = "room-ktx",     version.ref = "room" }
 room-compiler= { group = "androidx.room", name = "room-compiler",version.ref = "room" }
+retrofit-core           = { group = "com.squareup.retrofit2", name = "retrofit",           version.ref = "retrofit" }
+retrofit-converter-moshi= { group = "com.squareup.retrofit2", name = "converter-moshi",   version.ref = "retrofit" }
+moshi-kotlin            = { group = "com.squareup.moshi",     name = "moshi-kotlin",      version.ref = "moshi" }
+okhttp-logging          = { group = "com.squareup.okhttp3",   name = "logging-interceptor", version.ref = "okhttp" }
+coil = { group = "io.coil-kt", name = "coil", version.ref = "coil" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

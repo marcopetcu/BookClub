@@ -17,4 +17,7 @@ interface FollowBookDao {
 
     @Query("SELECT EXISTS(SELECT 1 FROM follow_book WHERE userId = :userId AND workId = :workId)")
     suspend fun hasFollow(userId: Long, workId: String): Boolean
+
+    @Query("SELECT userId FROM follow_book WHERE workId = :workId")
+    suspend fun getFollowerIdsForWork(workId: String): List<Long>
 }
