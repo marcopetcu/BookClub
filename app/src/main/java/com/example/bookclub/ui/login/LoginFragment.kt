@@ -6,40 +6,85 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
+import android.widget.ProgressBar
+import android.widget.TextView
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.example.bookclub.R
-import android.widget.TextView
+import com.example.bookclub.data.ServiceLocator
+import com.example.bookclub.data.session.Session
+import kotlinx.coroutines.flow.collectLatest
 
 class LoginFragment: Fragment() {
 
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View?  = inflater.inflate(R.layout.fragment_login, container, false)
+    private val viewModel: LoginViewModel by viewModels()
+    private val session by lazy { ServiceLocator.sessionManager(requireContext()) }
+
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
+        inflater.inflate(R.layout.fragment_login, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        view.findViewById<TextView>(R.id.tv_register).setOnClickListener {
-            val email = view.findViewById<EditText>(R.id.edt_email).text.toString()
-            goToRegister(email)
-        }
-
-        view.findViewById<Button>(R.id.btn_login).setOnClickListener {
+        if (session.isLoggedIn()) {
             goToHome()
+            return
         }
-    }
 
-    private fun goToRegister(email: String) {
-        val action = LoginFragmentDirections.actionLoginFragmentToRegisterFragment(email)
-        findNavController().navigate(action)
+        val email = view.findViewById<EditText>(R.id.edt_email)
+        val password = view.findViewById<EditText>(R.id.edt_password)
+        val btnLogin = view.findViewById<Button>(R.id.btn_login)
+        val tvRegister = view.findViewById<TextView>(R.id.tv_register)
+        val tvError = view.findViewById<TextView>(R.id.tv_error)
+        val progress = view.findViewById<ProgressBar>(R.id.progress)
+
+        btnLogin.setOnClickListener {
+            tvError.text = ""
+            viewModel.login(email.text?.toString().orEmpty(), password.text?.toString().orEmpty())
+        }
+
+        tvRegister.setOnClickListener {
+            val action = LoginFragmentDirections.actionLoginFragmentToRegisterFragment(email.text?.toString().orEmpty())
+            findNavController().navigate(action)
+        }
+
+        viewLifecycleOwner.lifecycleScope.launchWhenStarted {
+            viewModel.state.collectLatest { state ->
+                when (state) {
+                    is com.example.bookclub.ui.common.UiState.Idle -> {
+                        progress.visibility = View.GONE
+                    }
+                    is com.example.bookclub.ui.common.UiState.Loading -> {
+                        progress.visibility = View.VISIBLE
+                        tvError.text = ""
+                    }
+                    is com.example.bookclub.ui.common.UiState.Success -> {
+                        progress.visibility = View.GONE
+                        val u = state.data
+                        session.save(
+                            Session(
+                                userId = u.id,
+                                email = u.email,
+                                nickname = u.nickname,
+                                role = u.role,
+                                createdAtEpochMs = u.createdAt.toEpochMilli()
+                            )
+                        )
+                        goToHome()
+                    }
+                    is com.example.bookclub.ui.common.UiState.Error -> {
+                        progress.visibility = View.GONE
+                        tvError.text = state.throwable.message ?: "Authentication error"
+                    }
+                }
+            }
+        }
     }
 
     private fun goToHome() {
         val action = LoginFragmentDirections.actionLoginFragmentToNavigationHome()
         findNavController().navigate(action)
     }
-
 }
