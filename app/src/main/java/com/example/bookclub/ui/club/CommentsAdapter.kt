@@ -1,30 +1,48 @@
+@file:JvmName("CommentsAdapterKt")
+
 package com.example.bookclub.ui.club
 
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.example.bookclub.R
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 
-class CommentsAdapter : RecyclerView.Adapter<CommentsAdapter.VH>() {
+class CommentsAdapter :
+    ListAdapter<ClubComment, CommentsAdapter.VH>(Diff) {
 
-    private val items = mutableListOf<String>()
+    object Diff : DiffUtil.ItemCallback<ClubComment>() {
+        override fun areItemsTheSame(a: ClubComment, b: ClubComment) = a.id == b.id
+        override fun areContentsTheSame(a: ClubComment, b: ClubComment) = a == b
+    }
 
-    inner class VH(val tv: TextView) : RecyclerView.ViewHolder(tv)
+    inner class VH(view: View) : RecyclerView.ViewHolder(view) {
+        private val txtAuthor: TextView = view.findViewById(R.id.txtAuthor)
+        private val txtTime: TextView   = view.findViewById(R.id.txtTime)
+        private val txtContent: TextView= view.findViewById(R.id.txtContent)
+
+        fun bind(item: ClubComment) {
+            txtAuthor.text = item.authorName
+            txtTime.text   = item.createdAt.pretty()
+            txtContent.text= item.content
+        }
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH {
-        val tv = LayoutInflater.from(parent.context)
-            .inflate(android.R.layout.simple_list_item_1, parent, false) as TextView
-        return VH(tv)
+        val v = LayoutInflater.from(parent.context).inflate(R.layout.item_comment, parent, false)
+        return VH(v)
     }
-
-    override fun onBindViewHolder(holder: VH, position: Int) {
-        holder.tv.text = items[position]
-    }
-
-    override fun getItemCount() = items.size
-
-    fun addComment(comment: String) {
-        items.add(0, comment) // comentariul cel mai nou apare primul
-        notifyItemInserted(0)
-    }
+    override fun onBindViewHolder(holder: VH, position: Int) = holder.bind(getItem(position))
 }
+
+private val formatter: DateTimeFormatter = DateTimeFormatter
+    .ofPattern("dd MMM yyyy, HH:mm")
+    .withZone(ZoneId.systemDefault())
+
+private fun Instant.pretty(): String = formatter.format(this)

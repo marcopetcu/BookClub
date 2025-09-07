@@ -3,35 +3,35 @@ package com.example.bookclub.ui.club
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.bookclub.data.ServiceLocator
-import com.example.bookclub.data.db.CommentEntity
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import java.time.Instant
+import java.util.concurrent.atomic.AtomicLong
 
 class ClubDetailViewModel(app: Application) : AndroidViewModel(app) {
-    private val commentsRepo = ServiceLocator.commentsRepository(app)
-    private val db = ServiceLocator.db(app)
 
-    private val clubId = MutableStateFlow<Long?>(null)
-    fun setClub(id: Long) { clubId.value = id }
+    // listă locală pentru demo; înlocuiești ușor cu repo când ai backend
+    private val _comments = MutableStateFlow<List<ClubComment>>(emptyList())
+    val comments: StateFlow<List<ClubComment>> = _comments
 
-    val topLevelComments: Flow<List<CommentEntity>> =
-        clubId.flatMapLatest { id ->
-            id?.let { db.commentDao().getTopLevel(it) } ?: flowOf(emptyList())
-        }
+    private val idGen = AtomicLong(1L)
 
-    fun replies(parentId: Long): Flow<List<CommentEntity>> =
-        db.commentDao().getReplies(parentId)
+    // TODO: ia numele real din SessionManager sau profilul utilizatorului
+    private val currentUserName: String = "Me"
 
-    fun postComment(userId: Long, content: String, parentId: Long? = null) = viewModelScope.launch {
-        val cid = clubId.value ?: return@launch
-        commentsRepo.postComment(clubId = cid, userId = userId, content = content, parentId = parentId)
+    fun loadComments(clubId: Long) = viewModelScope.launch {
+        // mock: nimic de încărcat deocamdată; la repo ai apela getComments(clubId)
     }
 
-    fun vote(commentId: Long, userId: Long, up: Boolean) = viewModelScope.launch {
-        commentsRepo.vote(commentId, userId, if (up) 1 else -1)
+    fun postComment(clubId: Long, content: String) = viewModelScope.launch {
+        val newItem = ClubComment(
+            id = idGen.getAndIncrement(),
+            clubId = clubId,
+            authorName = currentUserName,
+            content = content,
+            createdAt = Instant.now()
+        )
+        _comments.value = _comments.value + newItem
     }
 }
