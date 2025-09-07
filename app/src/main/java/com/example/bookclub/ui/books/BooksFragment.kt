@@ -32,16 +32,14 @@ class BooksFragment : Fragment(R.layout.fragment_books) {
         val adapter = BooksAdapter { book: BookSearchItem ->
             val workId = book.key.substringAfterLast("/")
 
-            // trecem toate argumentele în constructorul acțiunii
-            val action = BooksFragmentDirections
-                .actionBooksFragmentToBookDetailFragment(
-                    workId  = workId,
-                    title   = book.title,
-                    author  = book.author.orEmpty(),
-                    coverUrl = book.coverUrl.orEmpty()
-                )
+            val bundle = BookDetailFragmentArgs(
+                workId  = workId,
+                title   = book.title,
+                author  = book.author.orEmpty(),
+                coverUrl = book.coverUrl.orEmpty()
+            ).toBundle()
 
-            findNavController().navigate(action)
+            findNavController().navigate(R.id.bookDetailFragment, bundle)
         }
 
         recycler.layoutManager = LinearLayoutManager(requireContext())
@@ -68,12 +66,9 @@ class BooksFragment : Fragment(R.layout.fragment_books) {
                         is UiState.Loading -> btnSearch.isEnabled = false
                         is UiState.Success -> {
                             btnSearch.isEnabled = true
-                            adapter.submitList(state.data)   // List<BookSearchItem>
+                            adapter.submitList(state.data) // List<BookSearchItem>
                         }
-                        is UiState.Error -> {
-                            btnSearch.isEnabled = true
-                            // TODO: afișează mesajul de eroare
-                        }
+                        is UiState.Error -> btnSearch.isEnabled = true
                     }
                 }
             }

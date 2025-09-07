@@ -16,14 +16,11 @@ class BooksViewModel(app: Application) : AndroidViewModel(app) {
 
     private val repo = ServiceLocator.booksRepository(app)
 
-    // ✅ LISTA pentru UI: BookSearchItem (NU BookListItem)
-    private val _searchState =
-        MutableStateFlow<UiState<List<BookSearchItem>>>(UiState.Idle)
+    // <<< DOAR BookSearchItem aici
+    private val _searchState = MutableStateFlow<UiState<List<BookSearchItem>>>(UiState.Idle)
     val searchState: StateFlow<UiState<List<BookSearchItem>>> = _searchState
 
-    // Detalii
-    private val _detailsState =
-        MutableStateFlow<UiState<BookWorkDetails>>(UiState.Idle)
+    private val _detailsState = MutableStateFlow<UiState<BookWorkDetails>>(UiState.Idle)
     val detailsState: StateFlow<UiState<BookWorkDetails>> = _detailsState
 
     private val _isFollowed = MutableStateFlow(false)
@@ -32,7 +29,7 @@ class BooksViewModel(app: Application) : AndroidViewModel(app) {
     fun searchBooks(query: String) = viewModelScope.launch {
         _searchState.value = UiState.Loading
         when (val res = repo.searchBooks(query)) {
-            is Result.Ok  -> _searchState.value = UiState.Success(res.value) // ✅ direct BookSearchItem
+            is Result.Ok  -> _searchState.value = UiState.Success(res.value) // direct
             is Result.Err -> _searchState.value = UiState.Error(res.throwable)
         }
     }
@@ -49,9 +46,11 @@ class BooksViewModel(app: Application) : AndroidViewModel(app) {
         _isFollowed.value = repo.isFollowing(userId, workId)
     }
     fun followBook(userId: Long, workId: String) = viewModelScope.launch {
-        repo.followBook(userId, workId); _isFollowed.value = true
+        repo.followBook(userId, workId)
+        _isFollowed.value = true
     }
     fun unfollowBook(userId: Long, workId: String) = viewModelScope.launch {
-        repo.unfollowBook(userId, workId); _isFollowed.value = false
+        repo.unfollowBook(userId, workId)
+        _isFollowed.value = false
     }
 }

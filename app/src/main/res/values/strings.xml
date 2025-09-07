@@ -40,4 +40,8 @@
     <string name="search">Search</string>
     <string name="club_created_fmt">Club created (id=%1$d)</string>
     <string name="err_club_duplicate">There is already an active club for this book.</string>
+    <string name="pick_start_date">Pick start date</string>
+    <string name="no_date_selected">No date selected</string>
+    <string name="date_must_be_future">Please select a date in the future</string>
+    <string name="creating_club">Creating club...</string>
 </resources>
