@@ -14,9 +14,11 @@ import java.time.Instant
 class ClubsViewModel(app: Application) : AndroidViewModel(app) {
     private val repo = ServiceLocator.clubsRepository(app)
 
+    // toate cluburile (ordonate după startAt)
     val clubs: StateFlow<List<BookClubEntity>> =
         repo.listAll().stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
+    // creare club
     fun createClub(
         adminId: Long,
         workId: String,
@@ -27,5 +29,15 @@ class ClubsViewModel(app: Application) : AndroidViewModel(app) {
         startAt: Instant
     ) = viewModelScope.launch {
         repo.createClub(adminId, workId, title, author, coverUrl, description, startAt)
+    }
+
+    // join club
+    fun joinClub(userId: Long, clubId: Long) = viewModelScope.launch {
+        repo.joinClub(userId, clubId)
+    }
+
+    // leave club
+    fun leaveClub(userId: Long, clubId: Long) = viewModelScope.launch {
+        repo.leaveClub(userId, clubId)
     }
 }

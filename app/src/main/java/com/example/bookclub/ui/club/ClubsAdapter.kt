@@ -51,9 +51,9 @@ class ClubsAdapter(
             }
 
             val (label, colorRes) = when (effective) {
-                ClubStatus.LIVE      -> "LIVE" to R.color.badgeLive
-                ClubStatus.SCHEDULED -> "SCHEDULED" to R.color.badgeScheduled
-                ClubStatus.CLOSED    -> "CLOSED" to R.color.badgeClosed
+                ClubStatus.LIVE      -> "LIVE"       to R.color.badgeLive
+                ClubStatus.SCHEDULED -> "SCHEDULED"  to R.color.badgeScheduled
+                ClubStatus.CLOSED    -> "CLOSED"     to R.color.badgeClosed
             }
             status.text = label
             status.setBackgroundResource(R.drawable.badge_pill)
@@ -65,8 +65,9 @@ class ClubsAdapter(
                 crossfade(true)
             }
 
-            // afișare inițială countdown
+            // prima actualizare a countdown-ului
             updateCountdown(item)
+
             itemView.setOnClickListener { onClick(item) }
         }
 
@@ -90,7 +91,7 @@ class ClubsAdapter(
         }
     }
 
-    // --- payload pt „tick” ca să nu re-legăm tot view-ul ---
+    // payload ușor pentru „tick” (evită rebind complet)
     private val PAYLOAD_TICK = Any()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH {
@@ -110,15 +111,14 @@ class ClubsAdapter(
         }
     }
 
-    // --- Ticker-ul global al adapterului ---
+    // ticker global al adapterului (1s)
     private val handler = Handler(Looper.getMainLooper())
     private val ticker = object : Runnable {
         override fun run() {
             if (itemCount > 0) {
-                // notificăm toate item-urile cu un payload ușor
                 notifyItemRangeChanged(0, itemCount, PAYLOAD_TICK)
             }
-            handler.postDelayed(this, 1000) // la 1s
+            handler.postDelayed(this, 1000)
         }
     }
 

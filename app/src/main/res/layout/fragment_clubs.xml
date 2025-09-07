@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:padding="16dp">
 
-    <!-- Buton simplu pentru creare club -->
+    <!-- Buton: Create Club (dev/test) -->
     <Button
         android:id="@+id/btnCreateClub"
         android:layout_width="0dp"
@@ -16,17 +16,29 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
 
-    <!-- Text simplu unde poți afișa de test lista de cluburi -->
+    <!-- Placeholder: vizibil doar când lista e goală -->
     <TextView
         android:id="@+id/txtClubsPlaceholder"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="No clubs yet"
+        android:text="@string/no_clubs"
         android:textSize="16sp"
         android:gravity="center"
+        android:visibility="gone"
         app:layout_constraintTop_toBottomOf="@id/btnCreateClub"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="24dp"/>
+        android:layout_marginTop="12dp"/>
 
+    <!-- Lista de cluburi -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerClubs"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:clipToPadding="false"
+        android:paddingTop="8dp"
+        app:layout_constraintTop_toBottomOf="@id/txtClubsPlaceholder"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
 </androidx.constraintlayout.widget.ConstraintLayout>
