@@ -4,7 +4,6 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.bookclub.data.ServiceLocator
-import com.example.bookclub.data.db.BookClubEntity
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -14,6 +13,7 @@ import kotlinx.coroutines.flow.stateIn
 import java.time.Instant
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
+import com.example.bookclub.data.db.BookClubEntity
 
 class HomeViewModel(app: Application) : AndroidViewModel(app) {
     private val clubsRepo = ServiceLocator.clubsRepository(app)

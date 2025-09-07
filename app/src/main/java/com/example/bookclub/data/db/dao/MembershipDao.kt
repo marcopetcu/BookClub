@@ -2,8 +2,8 @@ package com.example.bookclub.data.db.dao
 
 import androidx.room.*
 import com.example.bookclub.data.db.MembershipEntity
-import com.example.bookclub.data.db.BookClubEntity
 import kotlinx.coroutines.flow.Flow
+import com.example.bookclub.data.db.BookClubEntity
 
 @Dao
 interface MembershipDao {

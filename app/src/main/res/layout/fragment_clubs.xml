@@ -6,42 +6,27 @@
     android:layout_height="match_parent"
     android:padding="16dp">
 
-    <!-- Titlu -->
-    <TextView
-        android:id="@+id/txtTitle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/home"
-        android:textSize="18sp"
-        android:textStyle="bold"
-        android:gravity="center"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="24dp"/>
-
-    <!-- Buton Create Club -->
+    <!-- Buton simplu pentru creare club -->
     <Button
         android:id="@+id/btnCreateClub"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="@string/create_club"
-        app:layout_constraintTop_toBottomOf="@id/txtTitle"
+        android:text="Create Club"
+        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="16dp"
-        android:layout_marginHorizontal="32dp"/>
+        app:layout_constraintEnd_toEndOf="parent"/>
 
-    <!-- Placeholder pentru lista de cluburi -->
+    <!-- Text simplu unde poți afișa de test lista de cluburi -->
     <TextView
         android:id="@+id/txtClubsPlaceholder"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="@string/no_clubs"
+        android:text="No clubs yet"
         android:textSize="16sp"
         android:gravity="center"
         app:layout_constraintTop_toBottomOf="@id/btnCreateClub"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginTop="24dp"/>
+
 </androidx.constraintlayout.widget.ConstraintLayout>

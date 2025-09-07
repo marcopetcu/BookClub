@@ -5,7 +5,14 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
-import com.example.bookclub.data.db.dao.*
+import com.example.bookclub.data.db.dao.BookClubDao
+import com.example.bookclub.data.db.dao.CommentDao
+import com.example.bookclub.data.db.dao.FollowBookDao
+import com.example.bookclub.data.db.dao.FollowUserDao
+import com.example.bookclub.data.db.dao.InboxDao
+import com.example.bookclub.data.db.dao.MembershipDao
+import com.example.bookclub.data.db.dao.UserDao
+import com.example.bookclub.data.db.dao.VoteDao
 
 @Database(
     entities = [
@@ -18,7 +25,7 @@ import com.example.bookclub.data.db.dao.*
         FollowBookEntity::class,
         InboxEntity::class
     ],
-    version = 1,
+    version = 2, // versiune crescută după adăugarea BookClubEntity
     exportSchema = true
 )
 @TypeConverters(Converters::class)
@@ -34,6 +41,7 @@ abstract class AppDatabase : RoomDatabase() {
 
     companion object {
         @Volatile private var INSTANCE: AppDatabase? = null
+
         fun get(context: Context): AppDatabase =
             INSTANCE ?: synchronized(this) {
                 INSTANCE ?: Room.databaseBuilder(

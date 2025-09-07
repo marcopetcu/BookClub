@@ -1,7 +1,12 @@
 package com.example.bookclub.data.repository
 
-import com.example.bookclub.data.db.*
-import com.example.bookclub.data.db.dao.*
+import com.example.bookclub.data.db.BookClubEntity
+import com.example.bookclub.data.db.InboxEntity
+import com.example.bookclub.data.db.MembershipEntity
+import com.example.bookclub.data.db.dao.BookClubDao
+import com.example.bookclub.data.db.dao.FollowBookDao
+import com.example.bookclub.data.db.dao.InboxDao
+import com.example.bookclub.data.db.dao.MembershipDao
 import com.example.bookclub.data.model.ClubStatus
 import kotlinx.coroutines.flow.Flow
 import java.time.Duration
@@ -15,8 +20,8 @@ class ClubsRepository(
 ) {
     fun listAll(): Flow<List<BookClubEntity>> = clubDao.getAllOrderByStart()
 
-    fun search(query: String): Flow<List<BookClubEntity>> =
-        clubDao.search("%$query%")
+    /** DAO adaugă wildcard în SQL, deci trimitem DOAR query-ul */
+    fun search(query: String): Flow<List<BookClubEntity>> = clubDao.search(query)
 
     fun listForUser(userId: Long): Flow<List<BookClubEntity>> =
         membershipDao.getClubsForUser(userId)
@@ -24,51 +29,59 @@ class ClubsRepository(
     fun listForFollowedBooks(userId: Long): Flow<List<BookClubEntity>> =
         clubDao.listForFollowedBooks(userId)
 
+    /**
+     * Creează un club și returnează id-ul.
+     * - blochează dublurile ACTIVE (SCHEDULED/LIVE) pe același workId
+     * - status: SCHEDULED dacă startAt > now, altfel LIVE
+     * - closeAt = startAt + 72h
+     * - notifică followerii cărții în Inbox
+     */
     suspend fun createClub(
         adminId: Long,
         workId: String,
         title: String,
-        author: String,
+        author: String,          // non-null în entitate
         coverUrl: String?,
         description: String?,
         startAt: Instant
     ): Long {
-        val now = Instant.now()
-        val status = if (startAt.isAfter(now)) ClubStatus.SCHEDULED else ClubStatus.LIVE
-        val closeAt = startAt.plus(Duration.ofHours(72))
-
         if (clubDao.existsActiveForWork(workId)) {
             throw IllegalStateException("Active club already exists for this work")
         }
 
-        val id = clubDao.upsert(
+        val now = Instant.now()
+        val status = if (startAt.isAfter(now)) ClubStatus.SCHEDULED else ClubStatus.LIVE
+        val closeAt = startAt.plus(Duration.ofHours(72))
+
+        val clubId = clubDao.insert(
             BookClubEntity(
+                id = 0L,
                 workId = workId,
                 title = title,
                 author = author,
                 coverUrl = coverUrl,
                 description = description,
-                createdBy = adminId,
+                createdBy = adminId,    // denumirea din entitate
                 status = status,
-                startAt = startAt,
-                closeAt = closeAt
+                startAt = startAt,      // Instant
+                closeAt = closeAt       // Instant
             )
         )
 
-        val followers: List<Long> = followBookDao.getFollowerIdsForWork(workId)
-        val nowTs = Instant.now()
+        // Notifică followerii cărții
+        val followers = followBookDao.getFollowerIdsForWork(workId)
         followers.forEach { uid ->
             inboxDao.insert(
                 InboxEntity(
                     userId = uid,
                     type = "NEW_CLUB_FOR_FOLLOWED_BOOK",
-                    payloadJson = """{"clubId":$id,"workId":"$workId","title":"$title"}""",
+                    payloadJson = """{"clubId":$clubId,"workId":"$workId","title":"$title"}""",
                     isRead = false,
-                    createdAt = nowTs
+                    createdAt = now
                 )
             )
         }
-        return id
+        return clubId
     }
 
     suspend fun joinClub(userId: Long, clubId: Long) {

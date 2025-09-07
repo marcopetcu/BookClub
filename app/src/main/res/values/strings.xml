@@ -21,4 +21,13 @@
     <string name="profile">Profile</string>
 
 
+    <string name="follow">Follow</string>
+    <string name="unfollow">Unfollow</string>
+    <string name="no_description">No description available.</string>
+    <string name="error_fmt">Error: %1$s</string>
+    <string name="error_unknown">Eroare necunoscută</string>
+    <string name="create_club">Create Club</string>
+    <string name="no_clubs">No clubs yet</string>
+
+
 </resources>

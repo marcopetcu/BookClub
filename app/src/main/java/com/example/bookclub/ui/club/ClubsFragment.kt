@@ -1,19 +1,16 @@
-package com.example.bookclub.ui.home
+package com.example.bookclub.ui.club
 
 import android.os.Bundle
 import android.view.View
 import android.widget.Button
-import android.widget.TextView
-import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import com.example.bookclub.R
-import com.example.bookclub.ui.club.ClubsViewModel
 import kotlinx.coroutines.launch
 import java.time.Instant
 
-class HomeFragment : Fragment(R.layout.fragment_home) {
+class ClubsFragment : Fragment(R.layout.fragment_clubs) {
 
     private val viewModel: ClubsViewModel by viewModels()
 
@@ -21,16 +18,11 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         super.onViewCreated(view, savedInstanceState)
 
         val btnCreate: Button = view.findViewById(R.id.btnCreateClub)
-        val txtPlaceholder: TextView = view.findViewById(R.id.txtClubsPlaceholder)
 
-        // Observă lista de cluburi și actualizează placeholder-ul
+        // Observă lista de cluburi
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.clubs.collect { clubs ->
-                if (clubs.isEmpty()) {
-                    txtPlaceholder.text = getString(R.string.no_clubs)
-                } else {
-                    txtPlaceholder.text = clubs.joinToString("\n") { "• ${it.title} (${it.status})" }
-                }
+                // TODO: le legi la un RecyclerView sau Compose
             }
         }
 
@@ -42,10 +34,9 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                 title = "Club Test",
                 author = "Anonim",
                 coverUrl = null,
-                description = "Primul club creat din Home",
+                description = "Primul club creat",
                 startAt = Instant.now()
             )
-            Toast.makeText(requireContext(), "Club created", Toast.LENGTH_SHORT).show()
         }
     }
 }
