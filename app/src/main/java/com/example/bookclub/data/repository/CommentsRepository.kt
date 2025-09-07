@@ -6,6 +6,9 @@ import com.example.bookclub.data.db.VoteEntity
 import com.example.bookclub.data.db.dao.CommentDao
 import com.example.bookclub.data.db.dao.InboxDao
 import com.example.bookclub.data.db.dao.VoteDao
+import com.example.bookclub.data.model.ClubComment
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import java.time.Instant
 
 class CommentsRepository(
@@ -13,7 +16,22 @@ class CommentsRepository(
     private val voteDao: VoteDao,
     private val inboxDao: InboxDao
 ) {
-    suspend fun postComment(
+    /** Flow cu toate comentariile top-level pentru un club. */
+    fun getComments(clubId: Long): Flow<List<ClubComment>> =
+        commentDao.getTopLevel(clubId).map { list ->
+            list.map {
+                ClubComment(
+                    id = it.id,
+                    clubId = it.clubId,
+                    userId = it.userId,
+                    content = it.content,
+                    createdAt = it.createdAt
+                )
+            }
+        }
+
+    /** Adaugă un comentariu nou. */
+    suspend fun insertComment(
         clubId: Long,
         userId: Long,
         content: String,

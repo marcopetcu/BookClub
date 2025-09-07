@@ -43,25 +43,38 @@
         android:label="ProfileFragment"
         tools:layout="@layout/fragment_profile" />
 
-    <!-- navigation_home.xml (înlocuiește doar partea Clubs + adaugă Club Detail) -->
+    <!-- Clubs -->
     <fragment
         android:id="@+id/clubsFragment"
         android:name="com.example.bookclub.ui.club.ClubsFragment"
         android:label="Clubs"
         tools:layout="@layout/fragment_clubs">
+
         <action
             android:id="@+id/action_clubsFragment_to_clubDetailFragment"
             app:destination="@id/clubDetailFragment" />
     </fragment>
 
+    <!-- Club Detail (primește titlu + cover) -->
     <fragment
         android:id="@+id/clubDetailFragment"
         android:name="com.example.bookclub.ui.club.ClubDetailFragment"
         android:label="Club Detail"
         tools:layout="@layout/fragment_club_detail">
+
         <argument
             android:name="clubId"
             app:argType="long" />
+
+        <argument
+            android:name="title"
+            app:argType="string"
+            android:defaultValue="" />
+
+        <argument
+            android:name="coverUrl"
+            app:argType="string"
+            android:defaultValue="" />
     </fragment>
 
     <!-- Book Detail -->
@@ -70,17 +83,15 @@
         android:name="com.example.bookclub.ui.books.BookDetailFragment"
         android:label="Book Detail">
 
-        <argument android:name="workId"  app:argType="string" />
-        <argument android:name="title"   app:argType="string" android:defaultValue="" />
-        <argument android:name="author"  app:argType="string" android:defaultValue="" />
+        <argument android:name="workId"   app:argType="string" />
+        <argument android:name="title"    app:argType="string" android:defaultValue="" />
+        <argument android:name="author"   app:argType="string" android:defaultValue="" />
         <argument android:name="coverUrl" app:argType="string" android:defaultValue="" />
-
 
         <action
             android:id="@+id/action_bookDetailFragment_to_createBookClubFragment"
             app:destination="@id/createBookClubFragment" />
     </fragment>
-
 
     <!-- Create Book Club -->
     <fragment
@@ -88,21 +99,10 @@
         android:name="com.example.bookclub.ui.club.CreateBookClubFragment"
         android:label="Create Club">
 
-        <argument
-            android:name="workId"
-            app:argType="string" />
-        <argument
-            android:name="title"
-            app:argType="string"
-            android:defaultValue="" />
-        <argument
-            android:name="author"
-            app:argType="string"
-            android:defaultValue="" />
-        <argument
-            android:name="coverUrl"
-            app:argType="string"
-            android:defaultValue="" />
+        <argument android:name="workId"   app:argType="string" />
+        <argument android:name="title"    app:argType="string" android:defaultValue="" />
+        <argument android:name="author"   app:argType="string" android:defaultValue="" />
+        <argument android:name="coverUrl" app:argType="string" android:defaultValue="" />
     </fragment>
 
 </navigation>

@@ -1,14 +1,11 @@
 package com.example.bookclub.data.repository
 
-import com.example.bookclub.data.db.BookClubEntity
-import com.example.bookclub.data.db.InboxEntity
-import com.example.bookclub.data.db.MembershipEntity
-import com.example.bookclub.data.db.dao.BookClubDao
-import com.example.bookclub.data.db.dao.FollowBookDao
-import com.example.bookclub.data.db.dao.InboxDao
-import com.example.bookclub.data.db.dao.MembershipDao
+import com.example.bookclub.data.db.*
+import com.example.bookclub.data.db.dao.*
+import com.example.bookclub.data.model.ClubComment
 import com.example.bookclub.data.model.ClubStatus
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import java.time.Duration
 import java.time.Instant
 
@@ -16,7 +13,8 @@ class ClubsRepository(
     private val clubDao: BookClubDao,
     private val membershipDao: MembershipDao,
     private val followBookDao: FollowBookDao,
-    private val inboxDao: InboxDao
+    private val inboxDao: InboxDao,
+    private val commentDao: CommentDao   // ✅ ADĂUGAT: pentru comentarii
 ) {
     fun listAll(): Flow<List<BookClubEntity>> = clubDao.getAllOrderByStart()
 
@@ -40,7 +38,7 @@ class ClubsRepository(
         adminId: Long,
         workId: String,
         title: String,
-        author: String,          // non-null în entitate
+        author: String,
         coverUrl: String?,
         description: String?,
         startAt: Instant
@@ -61,10 +59,10 @@ class ClubsRepository(
                 author = author,
                 coverUrl = coverUrl,
                 description = description,
-                createdBy = adminId,    // denumirea din entitate
+                createdBy = adminId,
                 status = status,
-                startAt = startAt,      // Instant
-                closeAt = closeAt       // Instant
+                startAt = startAt,
+                closeAt = closeAt
             )
         )
 
@@ -99,5 +97,40 @@ class ClubsRepository(
 
     suspend fun leaveClub(userId: Long, clubId: Long) {
         membershipDao.delete(userId, clubId)
+    }
+
+    /* ======================= Comentarii ======================= */
+
+    // Flow cu lista de comentarii (top level) ale clubului
+    fun commentsFlow(clubId: Long): Flow<List<ClubComment>> =
+        commentDao.getTopLevel(clubId).map { list ->
+            list.map { e ->
+                ClubComment(
+                    id = e.id,
+                    clubId = e.clubId,
+                    userId = e.userId,          // 👈 afișăm userId în UI
+                    content = e.content,
+                    createdAt = e.createdAt
+                )
+            }
+        }
+
+    // Inseră un comentariu nou (parentId poate fi null)
+    suspend fun addComment(
+        clubId: Long,
+        userId: Long,
+        content: String,
+        parentId: Long? = null
+    ) {
+        commentDao.insert(
+            CommentEntity(
+                id = 0L,
+                clubId = clubId,
+                userId = userId,
+                content = content,
+                createdAt = Instant.now(),
+                parentId = parentId
+            )
+        )
     }
 }

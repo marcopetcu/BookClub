@@ -1,11 +1,11 @@
-package com.example.bookclub.ui.club
+package com.example.bookclub.data.model
 
 import java.time.Instant
 
 data class ClubComment(
     val id: Long,
     val clubId: Long,
-    val authorName: String,
+    val userId: Long,
     val content: String,
     val createdAt: Instant
 )

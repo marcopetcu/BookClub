@@ -1,5 +1,3 @@
-@file:JvmName("CommentsAdapterKt")
-
 package com.example.bookclub.ui.club
 
 import android.view.LayoutInflater
@@ -10,7 +8,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.example.bookclub.R
-import java.time.Instant
+import com.example.bookclub.data.model.ClubComment
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
@@ -25,12 +23,12 @@ class CommentsAdapter :
     inner class VH(view: View) : RecyclerView.ViewHolder(view) {
         private val txtAuthor: TextView = view.findViewById(R.id.txtAuthor)
         private val txtTime: TextView   = view.findViewById(R.id.txtTime)
-        private val txtContent: TextView= view.findViewById(R.id.txtContent)
+        private val txtContent: TextView = view.findViewById(R.id.txtContent)
 
         fun bind(item: ClubComment) {
-            txtAuthor.text = item.authorName
-            txtTime.text   = item.createdAt.pretty()
-            txtContent.text= item.content
+            txtAuthor.text = "User #${item.userId}"
+            txtTime.text   = formatter.format(item.createdAt.atZone(ZoneId.systemDefault()))
+            txtContent.text = item.content
         }
     }
 
@@ -38,11 +36,9 @@ class CommentsAdapter :
         val v = LayoutInflater.from(parent.context).inflate(R.layout.item_comment, parent, false)
         return VH(v)
     }
+
     override fun onBindViewHolder(holder: VH, position: Int) = holder.bind(getItem(position))
 }
 
-private val formatter: DateTimeFormatter = DateTimeFormatter
-    .ofPattern("dd MMM yyyy, HH:mm")
-    .withZone(ZoneId.systemDefault())
-
-private fun Instant.pretty(): String = formatter.format(this)
+private val formatter: DateTimeFormatter =
+    DateTimeFormatter.ofPattern("dd MMM yyyy, HH:mm")

@@ -16,7 +16,8 @@ object ServiceLocator {
             db(context).bookClubDao(),
             db(context).membershipDao(),
             db(context).followBookDao(),
-            db(context).inboxDao()
+            db(context).inboxDao(),
+            db(context).commentDao()   // ✅ ADĂUGAT pentru comentarii
         )
 
     fun commentsRepository(context: Context) =

@@ -89,6 +89,8 @@ data class FollowBookEntity(
     tableName = "inbox",
     indices = [Index("userId"), Index("isRead"), Index("createdAt")]
 )
+
+
 data class InboxEntity(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
     val userId: Long,

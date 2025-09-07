@@ -15,8 +15,7 @@ import com.example.bookclub.data.db.BookClubEntity
 import com.example.bookclub.ui.club.ClubsViewModel
 import kotlinx.coroutines.launch
 
-// Dacă ClubsAdapter este în ui.home, schimbă importul de mai jos:
-// import com.example.bookclub.ui.home.ClubsAdapter
+// dacă ai mutat adapterul în alt pachet, ajustează importul
 import com.example.bookclub.ui.club.ClubsAdapter
 
 class HomeFragment : Fragment(R.layout.fragment_home) {
@@ -31,21 +30,27 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
 
         val adapter = ClubsAdapter(
             onClick = { club: BookClubEntity ->
-                // deschide detaliile clubului (opțional, fără join)
-                // findNavController().navigate(
-                //     HomeFragmentDirections.actionHomeFragmentToClubDetailFragment(club.id)
-                // )
+                // navigare cu Safe Args — PASĂM ARGUMENTELE DIRECT ÎN FUNCȚIE
+                val action = HomeFragmentDirections.actionHomeFragmentToClubDetailFragment(
+                    clubId = club.id,
+                    title = club.title,
+                    coverUrl = club.coverUrl ?: ""
+                )
+                findNavController().navigate(action)
             },
             onJoinClick = { club: BookClubEntity ->
-                val userId = 1L // TODO: ia-l din SessionManager
+                val userId = 1L // TODO: din SessionManager
                 viewLifecycleOwner.lifecycleScope.launch {
                     try {
                         viewModel.joinClub(userId, club.id)
                         Toast.makeText(requireContext(), getString(R.string.joined_club), Toast.LENGTH_SHORT).show()
-                        // după join, mergi la ecranul de comentarii
-                        findNavController().navigate(
-                            HomeFragmentDirections.actionHomeFragmentToClubDetailFragment(club.id)
+
+                        val action = HomeFragmentDirections.actionHomeFragmentToClubDetailFragment(
+                            clubId = club.id,
+                            title = club.title,
+                            coverUrl = club.coverUrl ?: ""
                         )
+                        findNavController().navigate(action)
                     } catch (t: Throwable) {
                         Toast.makeText(requireContext(), t.message ?: "Join failed", Toast.LENGTH_LONG).show()
                     }

@@ -30,22 +30,26 @@ class ClubsFragment : Fragment(R.layout.fragment_clubs) {
 
         val adapter = ClubsAdapter(
             onClick = { club ->
-                // navigare la detalii fără join (opțional)
-                findNavController().navigate(
-                    ClubsFragmentDirections.actionClubsFragmentToClubDetailFragment(clubId = club.id)
+                val action = ClubsFragmentDirections.actionClubsFragmentToClubDetailFragment(
+                    clubId = club.id,
+                    title = club.title,
+                    coverUrl = club.coverUrl ?: ""
                 )
+                findNavController().navigate(action)
             },
             onJoinClick = { club ->
-                // TODO: userId real din SessionManager
-                val userId = 1L
+                val userId = 1L // TODO: din SessionManager
                 viewLifecycleOwner.lifecycleScope.launch {
                     try {
                         viewModel.joinClub(userId, club.id)
                         Toast.makeText(requireContext(), getString(R.string.joined_club), Toast.LENGTH_SHORT).show()
-                        // după join → direct în ecranul de comentarii
-                        findNavController().navigate(
-                            ClubsFragmentDirections.actionClubsFragmentToClubDetailFragment(clubId = club.id)
+
+                        val action = ClubsFragmentDirections.actionClubsFragmentToClubDetailFragment(
+                            clubId = club.id,
+                            title = club.title,
+                            coverUrl = club.coverUrl ?: ""
                         )
+                        findNavController().navigate(action)
                     } catch (t: Throwable) {
                         Toast.makeText(requireContext(), t.message ?: "Join failed", Toast.LENGTH_LONG).show()
                     }
@@ -66,16 +70,15 @@ class ClubsFragment : Fragment(R.layout.fragment_clubs) {
             }
         }
 
-        // buton dev: creează un club rapid
         btnCreate?.setOnClickListener {
             viewModel.createClub(
-                adminId    = 1L,
-                workId     = "OL12345W",
-                title      = "Club Test",
-                author     = "Anonim",
-                coverUrl   = null,
-                description= "Primul club creat",
-                startAt    = Instant.now().plusSeconds(3600)
+                adminId     = 1L,
+                workId      = "OL12345W",
+                title       = "Club Test",
+                author      = "Anonim",
+                coverUrl    = null,
+                description = "Primul club creat",
+                startAt     = Instant.now().plusSeconds(3600)
             )
         }
     }
