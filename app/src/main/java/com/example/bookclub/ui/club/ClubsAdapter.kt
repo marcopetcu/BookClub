@@ -1,10 +1,11 @@
-package com.example.bookclub.ui.home
+package com.example.bookclub.ui.club
 
 import android.os.Handler
 import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.core.content.ContextCompat
@@ -22,7 +23,8 @@ import java.time.format.DateTimeFormatter
 import kotlin.math.max
 
 class ClubsAdapter(
-    private val onClick: (BookClubEntity) -> Unit
+    private val onClick: (BookClubEntity) -> Unit,
+    private val onJoinClick: (BookClubEntity) -> Unit = {}   // <- default so HomeFragment can pass only one lambda
 ) : ListAdapter<BookClubEntity, ClubsAdapter.VH>(Diff) {
 
     object Diff : DiffUtil.ItemCallback<BookClubEntity>() {
@@ -31,12 +33,13 @@ class ClubsAdapter(
     }
 
     inner class VH(view: View) : RecyclerView.ViewHolder(view) {
-        val img: ImageView = view.findViewById(R.id.imgCover)
-        val title: TextView = view.findViewById(R.id.txtTitle)
-        val author: TextView = view.findViewById(R.id.txtAuthor)
-        val start: TextView = view.findViewById(R.id.txtStart)
-        val status: TextView = view.findViewById(R.id.txtStatus)
-        val countdown: TextView = view.findViewById(R.id.txtCountdown)
+        private val img: ImageView = view.findViewById(R.id.imgCover)
+        private val title: TextView = view.findViewById(R.id.txtTitle)
+        private val author: TextView = view.findViewById(R.id.txtAuthor)
+        private val start: TextView = view.findViewById(R.id.txtStart)
+        private val status: TextView = view.findViewById(R.id.txtStatus)
+        private val countdown: TextView = view.findViewById(R.id.txtCountdown)
+        private val btnJoin: Button = view.findViewById(R.id.btnJoin)
 
         fun bindStatic(item: BookClubEntity) {
             title.text = item.title
@@ -65,10 +68,11 @@ class ClubsAdapter(
                 crossfade(true)
             }
 
-            // prima actualizare a countdown-ului
+            // countdown inițial
             updateCountdown(item)
 
             itemView.setOnClickListener { onClick(item) }
+            btnJoin.setOnClickListener { onJoinClick(item) }
         }
 
         fun updateCountdown(item: BookClubEntity) {
@@ -84,14 +88,11 @@ class ClubsAdapter(
                     countdown.visibility = View.VISIBLE
                     countdown.text = "Live: ${left.asHms()} left"
                 }
-                else -> {
-                    countdown.visibility = View.GONE
-                }
+                else -> countdown.visibility = View.GONE
             }
         }
     }
 
-    // payload ușor pentru „tick” (evită rebind complet)
     private val PAYLOAD_TICK = Any()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH {
@@ -111,13 +112,10 @@ class ClubsAdapter(
         }
     }
 
-    // ticker global al adapterului (1s)
     private val handler = Handler(Looper.getMainLooper())
     private val ticker = object : Runnable {
         override fun run() {
-            if (itemCount > 0) {
-                notifyItemRangeChanged(0, itemCount, PAYLOAD_TICK)
-            }
+            if (itemCount > 0) notifyItemRangeChanged(0, itemCount, PAYLOAD_TICK)
             handler.postDelayed(this, 1000)
         }
     }
@@ -133,15 +131,13 @@ class ClubsAdapter(
     }
 }
 
-/* ------- helpers ------- */
-
+/* helpers */
 private val prettyFormatter: DateTimeFormatter = DateTimeFormatter
     .ofPattern("dd MMM yyyy, HH:mm")
     .withZone(ZoneId.systemDefault())
 
 private fun Instant.toPrettyDate(): String = prettyFormatter.format(this)
 
-/** Format „HH:mm:ss” (sau „dd:HH:mm:ss” dacă e > 24h). */
 private fun Duration.asHms(): String {
     val totalSec = max(0, this.seconds)
     val days = totalSec / 86_400

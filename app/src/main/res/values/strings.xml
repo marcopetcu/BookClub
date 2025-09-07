@@ -50,4 +50,9 @@
     <string name="label_end_not_set">End: —</string>
     <string name="label_end_at">End: %1$s</string>
     <string name="err_end_before_start">End must be after start</string>
+    <string name="joined_club">Joined the club!</string>
+    <string name="club_detail_header_fmt">Club #%1$d</string>
+    <string name="hint_add_comment">Write a comment…</string>
+    <string name="send">Send</string>
+    <string name="club_detail_preview">Club #0</string>
 </resources>

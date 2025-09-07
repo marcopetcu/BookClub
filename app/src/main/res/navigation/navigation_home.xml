@@ -10,7 +10,12 @@
         android:id="@+id/homeFragment"
         android:name="com.example.bookclub.ui.home.HomeFragment"
         android:label="HomeFragment"
-        tools:layout="@layout/fragment_home" />
+        tools:layout="@layout/fragment_home">
+
+        <action
+            android:id="@+id/action_homeFragment_to_clubDetailFragment"
+            app:destination="@id/clubDetailFragment" />
+    </fragment>
 
     <!-- Books -->
     <fragment
@@ -38,12 +43,26 @@
         android:label="ProfileFragment"
         tools:layout="@layout/fragment_profile" />
 
-    <!-- Clubs -->
+    <!-- navigation_home.xml (înlocuiește doar partea Clubs + adaugă Club Detail) -->
     <fragment
         android:id="@+id/clubsFragment"
         android:name="com.example.bookclub.ui.club.ClubsFragment"
         android:label="Clubs"
-        tools:layout="@layout/fragment_clubs" />
+        tools:layout="@layout/fragment_clubs">
+        <action
+            android:id="@+id/action_clubsFragment_to_clubDetailFragment"
+            app:destination="@id/clubDetailFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/clubDetailFragment"
+        android:name="com.example.bookclub.ui.club.ClubDetailFragment"
+        android:label="Club Detail"
+        tools:layout="@layout/fragment_club_detail">
+        <argument
+            android:name="clubId"
+            app:argType="long" />
+    </fragment>
 
     <!-- Book Detail -->
     <fragment
