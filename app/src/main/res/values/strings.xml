@@ -19,6 +19,11 @@
 
     <!-- PROFILE -->
     <string name="profile">Profile</string>
+    <string name="email">email</string>
+    <string name="password">password</string>
+    <string name="logout">Logout</string>
+    <string name="nickname">nickname</string>
+    <string name="confirm_password">confirm password</string>
 
 
     <string name="follow">Follow</string>
