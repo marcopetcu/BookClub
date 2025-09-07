@@ -62,20 +62,34 @@
         android:id="@+id/btnCreate"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:minHeight="48dp"
         android:layout_marginTop="16dp"
+        android:minHeight="48dp"
         android:text="@string/create_club" />
 
     <TextView
         android:id="@+id/txtStartDate"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/no_date_selected"
-        android:paddingTop="8dp"/>
+        android:text="@string/label_start_not_set"
+        android:paddingTop="12dp"/>
 
+    <!-- END -->
     <Button
-        android:id="@+id/btnPickDate"
+        android:id="@+id/btnPickStart"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/pick_start_date" />
+
+    <TextView
+        android:id="@+id/txtEndDate"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/label_end_not_set"
+        android:paddingTop="12dp"/>
+
+    <Button
+        android:id="@+id/btnPickEnd"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/pick_end_date" />
 </LinearLayout>

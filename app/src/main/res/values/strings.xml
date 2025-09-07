@@ -44,4 +44,10 @@
     <string name="no_date_selected">No date selected</string>
     <string name="date_must_be_future">Please select a date in the future</string>
     <string name="creating_club">Creating club...</string>
+    <string name="label_start_at">Start: %1$s</string>
+    <string name="pick_end_date">Pick end date &amp; time</string>
+    <string name="label_start_not_set">Start: —</string>
+    <string name="label_end_not_set">End: —</string>
+    <string name="label_end_at">End: %1$s</string>
+    <string name="err_end_before_start">End must be after start</string>
 </resources>

@@ -2,4 +2,8 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="badgeLive">#FF6F00</color>        <!-- portocaliu -->
+    <color name="badgeScheduled">#FFC107</color>   <!-- galben -->
+    <color name="badgeClosed">#9E9E9E</color>      <!-- gri -->
+    <color name="badgeTextOn">#FFFFFF</color>
 </resources>
