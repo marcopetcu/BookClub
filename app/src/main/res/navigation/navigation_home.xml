@@ -5,53 +5,85 @@
     android:id="@+id/navigation_home"
     app:startDestination="@id/homeFragment">
 
+    <!-- Home -->
     <fragment
         android:id="@+id/homeFragment"
         android:name="com.example.bookclub.ui.home.HomeFragment"
         android:label="HomeFragment"
-        tools:layout="@layout/fragment_home"/>
+        tools:layout="@layout/fragment_home" />
 
-
-
+    <!-- Books -->
     <fragment
         android:id="@+id/booksFragment"
         android:name="com.example.bookclub.ui.books.BooksFragment"
         android:label="BooksFragment"
         tools:layout="@layout/fragment_books">
 
-    <action
-    android:id="@+id/action_booksFragment_to_bookDetailFragment"
-    app:destination="@id/BookDetailFragment"/>
-</fragment>
+        <action
+            android:id="@+id/action_booksFragment_to_bookDetailFragment"
+            app:destination="@id/bookDetailFragment" />
+    </fragment>
 
+    <!-- Inbox -->
     <fragment
         android:id="@+id/inboxFragment"
         android:name="com.example.bookclub.ui.inbox.InboxFragment"
         android:label="InboxFragment"
-        tools:layout="@layout/fragment_inbox"/>
+        tools:layout="@layout/fragment_inbox" />
 
+    <!-- Profile -->
     <fragment
         android:id="@+id/profileFragment"
         android:name="com.example.bookclub.ui.profile.ProfileFragment"
         android:label="ProfileFragment"
-        tools:layout="@layout/fragment_profile"/>
+        tools:layout="@layout/fragment_profile" />
 
-    <fragment
-        android:id="@+id/BookDetailFragment"
-        android:name="com.example.bookclub.ui.books.BookDetailFragment"
-        android:label="Book Detail">
-        <argument
-            android:name="workId"
-            app:argType="string"
-            android:defaultValue="" />
-
-        </fragment>
-
+    <!-- Clubs -->
     <fragment
         android:id="@+id/clubsFragment"
         android:name="com.example.bookclub.ui.club.ClubsFragment"
         android:label="Clubs"
         tools:layout="@layout/fragment_clubs" />
 
+    <!-- Book Detail -->
+    <fragment
+        android:id="@+id/bookDetailFragment"
+        android:name="com.example.bookclub.ui.books.BookDetailFragment"
+        android:label="Book Detail">
+
+        <argument android:name="workId"  app:argType="string" />
+        <argument android:name="title"   app:argType="string" android:defaultValue="" />
+        <argument android:name="author"  app:argType="string" android:defaultValue="" />
+        <argument android:name="coverUrl" app:argType="string" android:defaultValue="" />
+
+
+        <action
+            android:id="@+id/action_bookDetailFragment_to_createBookClubFragment"
+            app:destination="@id/createBookClubFragment" />
+    </fragment>
+
+
+    <!-- Create Book Club -->
+    <fragment
+        android:id="@+id/createBookClubFragment"
+        android:name="com.example.bookclub.ui.club.CreateBookClubFragment"
+        android:label="Create Club">
+
+        <argument
+            android:name="workId"
+            app:argType="string" />
+        <argument
+            android:name="title"
+            app:argType="string"
+            android:defaultValue="" />
+        <argument
+            android:name="author"
+            app:argType="string"
+            android:defaultValue="" />
+        <argument
+            android:name="coverUrl"
+            app:argType="string"
+            android:defaultValue="" />
+    </fragment>
 
 </navigation>

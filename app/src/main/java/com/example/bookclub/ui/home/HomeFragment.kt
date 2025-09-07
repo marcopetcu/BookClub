@@ -2,16 +2,15 @@ package com.example.bookclub.ui.home
 
 import android.os.Bundle
 import android.view.View
-import android.widget.Button
 import android.widget.TextView
-import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.example.bookclub.R
 import com.example.bookclub.ui.club.ClubsViewModel
 import kotlinx.coroutines.launch
-import java.time.Instant
 
 class HomeFragment : Fragment(R.layout.fragment_home) {
 
@@ -20,32 +19,21 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val btnCreate: Button = view.findViewById(R.id.btnCreateClub)
-        val txtPlaceholder: TextView = view.findViewById(R.id.txtClubsPlaceholder)
-
-        // Observă lista de cluburi și actualizează placeholder-ul
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.clubs.collect { clubs ->
-                if (clubs.isEmpty()) {
-                    txtPlaceholder.text = getString(R.string.no_clubs)
-                } else {
-                    txtPlaceholder.text = clubs.joinToString("\n") { "• ${it.title} (${it.status})" }
-                }
-            }
+        val recycler = view.findViewById<RecyclerView>(R.id.recyclerClubs)
+        val empty = view.findViewById<TextView>(R.id.txtEmpty)
+        val adapter = ClubsAdapter { club ->
+            // TODO: navigate la detaliul clubului (când vei avea ecranul)
+            // findNavController().navigate(...)
         }
+        recycler.layoutManager = LinearLayoutManager(requireContext())
+        recycler.setHasFixedSize(true)
+        recycler.adapter = adapter
 
-        // Creează un club de test
-        btnCreate.setOnClickListener {
-            viewModel.createClub(
-                adminId = 1L,
-                workId = "OL12345W",
-                title = "Club Test",
-                author = "Anonim",
-                coverUrl = null,
-                description = "Primul club creat din Home",
-                startAt = Instant.now()
-            )
-            Toast.makeText(requireContext(), "Club created", Toast.LENGTH_SHORT).show()
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.clubs.collect { list ->
+                adapter.submitList(list)
+                empty.visibility = if (list.isEmpty()) View.VISIBLE else View.GONE
+            }
         }
     }
 }

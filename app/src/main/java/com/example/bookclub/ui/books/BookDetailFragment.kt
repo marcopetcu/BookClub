@@ -9,6 +9,7 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import coil.load
 import com.example.bookclub.R
@@ -25,9 +26,11 @@ class BookDetailFragment : Fragment(R.layout.fragment_book_detail) {
     private lateinit var txtSubjects: TextView
     private lateinit var txtDescription: TextView
     private lateinit var btnFollow: Button
+    private lateinit var btnCreateClub: Button
 
-    // TODO: ia userId real din SessionManager când M3 e gata
+    // TODO: ia userId/role reale din SessionManager (M3)
     private val userId = 1L
+    private val isAdmin = true // TEMP
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -37,43 +40,70 @@ class BookDetailFragment : Fragment(R.layout.fragment_book_detail) {
         txtSubjects = view.findViewById(R.id.txtSubjects)
         txtDescription = view.findViewById(R.id.txtDescription)
         btnFollow = view.findViewById(R.id.btnFollow)
+        btnCreateClub = view.findViewById(R.id.btnCreateClub)
 
         val workId = args.workId
 
-        // 1) Detalii + starea de follow pentru cartea curentă
+        // butonul Create Club vizibil doar pt ADMIN
+        btnCreateClub.visibility = if (isAdmin) View.VISIBLE else View.GONE
+
+        // încărcăm detalii + follow state
         viewModel.loadWorkDetails(workId)
         viewModel.loadFollowState(userId, workId)
 
-        // 2) Observă detaliile
+        // observăm detaliile
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.detailsState.collect { state ->
                 when (state) {
                     UiState.Idle -> Unit
-                    is UiState.Loading -> btnFollow.isEnabled = false
+
+                    is UiState.Loading -> {
+                        btnFollow.isEnabled = false
+                        // poți afișa un loader dacă vrei
+                    }
+
                     is UiState.Success -> {
                         btnFollow.isEnabled = true
                         val d = state.data
-                        txtTitle.text = d.title
+
+                        // titlu / subjects / descriere / copertă
+                        txtTitle.text = d.title.ifBlank { args.title }
                         txtSubjects.isVisible = d.subjects.isNotEmpty()
                         txtSubjects.text = d.subjects.joinToString(" • ")
-                        txtDescription.text = d.description ?: getString(R.string.no_description)
+                        txtDescription.text =
+                            d.description ?: getString(R.string.no_description)
 
-                        imgCover.load(d.coverUrl) {
+                        imgCover.load(d.coverUrl ?: args.coverUrl) {
                             crossfade(true)
                             placeholder(R.drawable.ic_book_placeholder)
                             error(R.drawable.ic_book_placeholder)
                         }
+
+                        // Create Club → folosim Safe Args (setăm PARAMETRII explicit)
+                        btnCreateClub.setOnClickListener {
+                            val action =
+                                BookDetailFragmentDirections
+                                    .actionBookDetailFragmentToCreateBookClubFragment(
+                                        workId  = workId,
+                                        title   = d.title.ifBlank { args.title },
+                                        author  = args.author.ifBlank { "Unknown" },
+                                        coverUrl = d.coverUrl ?: args.coverUrl
+                                    )
+                            findNavController().navigate(action)
+                        }
                     }
+
                     is UiState.Error -> {
                         val msg = state.throwable.message ?: getString(R.string.error_unknown)
                         txtDescription.text = getString(R.string.error_fmt, msg)
                         btnFollow.isEnabled = false
+                        btnCreateClub.visibility = View.GONE
                     }
                 }
             }
         }
 
-        // 3) Observă starea de follow din ViewModel
+        // follow/unfollow – observăm starea
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.isFollowed.collect { followed ->
                 btnFollow.text =
@@ -82,14 +112,10 @@ class BookDetailFragment : Fragment(R.layout.fragment_book_detail) {
             }
         }
 
-        // 4) Click Follow/Unfollow (Varianta A: repo fără title/cover)
         btnFollow.setOnClickListener {
-            if (viewModel.isFollowed.value) {
-                viewModel.unfollowBook(userId, workId)
-            } else {
-                viewModel.followBook(userId, workId)
-            }
-            btnFollow.isEnabled = false // se reactivează după ce VM emite noua stare
+            if (viewModel.isFollowed.value) viewModel.unfollowBook(userId, workId)
+            else viewModel.followBook(userId, workId)
+            btnFollow.isEnabled = false
         }
     }
 }
