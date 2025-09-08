@@ -1,7 +1,7 @@
 package com.example.bookclub.ui.books
 
 import android.content.Intent
-import android.net.Uri
+import androidx.core.net.toUri
 import android.os.Bundle
 import android.view.View
 import android.widget.Button
@@ -98,7 +98,7 @@ class BookDetailFragment : Fragment(R.layout.fragment_book_detail) {
                         // ✅ Open Book Page → browser
                         btnOpenWeb.setOnClickListener {
                             val url = "https://openlibrary.org/works/${args.workId}"
-                            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+                            val intent = Intent(Intent.ACTION_VIEW, url.toUri())
                             startActivity(intent)
                         }
                     }
