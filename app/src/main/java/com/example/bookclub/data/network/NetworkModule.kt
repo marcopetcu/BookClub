@@ -7,6 +7,7 @@ import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 
+// configurare Retrofit + Moshi + OkHttp (logging)
 object NetworkModule {
     private val moshi = Moshi.Builder()
         .add(KotlinJsonAdapterFactory())

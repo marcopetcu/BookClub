@@ -4,6 +4,7 @@ import androidx.room.*
 import com.example.bookclub.data.db.CommentEntity
 import kotlinx.coroutines.flow.Flow
 
+// DAO Room pentru Comment: metode CRUD si query-uri specifice
 @Dao
 interface CommentDao {
     @Insert

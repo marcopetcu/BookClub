@@ -3,9 +3,11 @@ package com.example.bookclub.data.network
 import com.example.bookclub.data.model.BookSearchItem
 import com.example.bookclub.data.model.BookWorkDetails
 
+// mappers: traduc DTO-urile de retea -> modele domeniu
 private fun coverUrlFromId(id: Int?, size: Char = 'M'): String? =
     id?.let { "https://covers.openlibrary.org/b/id/${it}-${size}.jpg" }
 
+// mapare rezultate de cautare
 fun DocDto.toBookSearchItem(): BookSearchItem {
     val workId = (key ?: "").removePrefix("/works/")
     val author = authorName?.firstOrNull()
@@ -17,6 +19,7 @@ fun DocDto.toBookSearchItem(): BookSearchItem {
     )
 }
 
+// mapare detalii carte
 fun WorkDetailsDto.toBookWorkDetails(workId: String): BookWorkDetails {
     val desc = when (val d = description) {
         is String -> d

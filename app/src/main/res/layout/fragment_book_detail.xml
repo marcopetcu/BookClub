@@ -41,7 +41,7 @@
         <Button
             android:id="@+id/btnFollow"
             android:layout_marginTop="16dp"
-            android:text="Follow"
+            android:text="@string/follow"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
         <Button

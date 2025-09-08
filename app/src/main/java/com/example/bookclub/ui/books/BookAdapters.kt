@@ -12,6 +12,7 @@ import coil.load
 import com.example.bookclub.R
 import com.example.bookclub.data.model.BookSearchItem
 
+// adapter pentru RecyclerVeiw
 class BooksAdapter(
     private val onItemClick: (BookSearchItem) -> Unit
 ) : ListAdapter<BookSearchItem, BooksAdapter.BookViewHolder>(Diff) {
@@ -40,6 +41,7 @@ class BooksAdapter(
         private val title: TextView = itemView.findViewById(R.id.tv_title)
         private val author: TextView = itemView.findViewById(R.id.tv_author)
 
+        // leaga datele din BookSearchItem de view-uri
         fun bind(item: BookSearchItem) {
             title.text = item.title
             author.text = item.author.orEmpty()

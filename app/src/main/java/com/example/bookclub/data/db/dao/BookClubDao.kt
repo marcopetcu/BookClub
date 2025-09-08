@@ -8,6 +8,7 @@ import com.example.bookclub.data.db.BookClubEntity   // <— IMPORTUL LIPSEA
 import com.example.bookclub.data.model.ClubStatus
 import kotlinx.coroutines.flow.Flow
 
+// DAO Room pentru BookClub: metode CRUD si query-uri specifice
 @Dao
 interface BookClubDao {
 

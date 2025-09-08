@@ -5,6 +5,7 @@ import com.example.bookclub.data.db.MembershipEntity
 import kotlinx.coroutines.flow.Flow
 import com.example.bookclub.data.db.BookClubEntity
 
+// DAO Room pentru Membership: metode CRUD si query-uri specifice
 @Dao
 interface MembershipDao {
     @Upsert

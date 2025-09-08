@@ -4,6 +4,8 @@ import androidx.room.TypeConverter
 import com.example.bookclub.data.model.ClubStatus
 import java.time.Instant
 
+// TypeConverters Room: transformari pentru Instant si ClubStatus
+// convertori folositi de Room pentru tipuri non-primitive
 class Converters {
 
     // Instant ↔ Long

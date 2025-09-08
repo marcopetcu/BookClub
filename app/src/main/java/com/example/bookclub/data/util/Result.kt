@@ -1,5 +1,6 @@
 package com.example.bookclub.data.util
 
+// wrapper rezultate Success/Error pentru operatii
 sealed class Result<out T> {
     data class Ok<T>(val value: T): Result<T>()
     data class Err(val throwable: Throwable): Result<Nothing>()

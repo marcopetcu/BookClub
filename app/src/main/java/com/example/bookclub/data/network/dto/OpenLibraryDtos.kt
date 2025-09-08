@@ -6,6 +6,7 @@ data class SearchResponseDto(
     val docs: List<DocDto> = emptyList()
 )
 
+// DTO-uri pentru raspunsurile OpenLibrary (Moshi)
 data class DocDto(
     val key: String?,                      // ex: "/works/OL12345W"
     val title: String?,
