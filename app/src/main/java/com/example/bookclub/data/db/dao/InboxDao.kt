@@ -4,6 +4,7 @@ import androidx.room.*
 import com.example.bookclub.data.db.InboxEntity
 import kotlinx.coroutines.flow.Flow
 
+// DAO Room pentru Inbox: metode CRUD si query-uri specifice
 @Dao
 interface InboxDao {
     @Insert

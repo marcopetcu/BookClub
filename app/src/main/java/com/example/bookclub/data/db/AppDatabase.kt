@@ -20,6 +20,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 
+// Room DB: declarare entitati, DAO, TypeConverters; configurare builder si seed
 @Database(
     entities = [
         UserEntity::class,
@@ -34,6 +35,7 @@ import kotlinx.coroutines.withContext
     version = 2, // versiune crescută după adăugarea BookClubEntity si autentificare
     exportSchema = true
 )
+// clasa principala RoomDatabase
 @TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun userDao(): UserDao
@@ -55,11 +57,11 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     "bookclub.db"
                 )
-                    .fallbackToDestructiveMigration(true)
+                    .fallbackToDestructiveMigration(true) // in dev sterge si recreeaza schema la incompatibilitate
                     .build()
                 INSTANCE = instance
                 val isDebug = (context.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE) != 0
-                if (isDebug) seedSync(instance)
+                if (isDebug) seedSync(instance) // insereaza useri demo daca baza este goala
                 instance
             }
 

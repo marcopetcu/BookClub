@@ -2,6 +2,7 @@ package com.example.bookclub.data.session
 
 import android.content.Context
 
+// gestioneaza sessiune in SharedPreferences
 data class Session(
     val userId: Long,
     val email: String,

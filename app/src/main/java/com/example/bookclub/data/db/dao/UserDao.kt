@@ -3,6 +3,7 @@ package com.example.bookclub.data.db.dao
 import androidx.room.*
 import com.example.bookclub.data.db.UserEntity
 
+// DAO Room pentru User: metode CRUD si query-uri specifice
 @Dao
 interface UserDao {
     @Insert(onConflict = OnConflictStrategy.ABORT)

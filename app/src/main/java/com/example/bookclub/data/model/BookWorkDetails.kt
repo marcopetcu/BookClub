@@ -1,5 +1,6 @@
 package com.example.bookclub.data.model
 
+// Modele domeniu folosite in app (BookWorkDetails.kt)
 data class BookWorkDetails(
     val workId: String,
     val title: String,

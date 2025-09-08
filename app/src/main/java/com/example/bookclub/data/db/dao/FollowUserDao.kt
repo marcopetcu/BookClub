@@ -4,6 +4,7 @@ import androidx.room.*
 import com.example.bookclub.data.db.FollowUserEntity
 import kotlinx.coroutines.flow.Flow
 
+// DAO Room pentru FollowUser: metode CRUD si query-uri specifice
 @Dao
 interface FollowUserDao {
     @Upsert

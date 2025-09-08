@@ -4,6 +4,7 @@ import androidx.room.*
 import com.example.bookclub.data.model.ClubStatus
 import java.time.Instant
 
+// Entitati Room (tabele) si indecsi
 @Entity(tableName = "user",
     indices = [Index("email", unique = true), Index("nickname", unique = true)])
 data class UserEntity(
