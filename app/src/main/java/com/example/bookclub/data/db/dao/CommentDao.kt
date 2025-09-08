@@ -1,20 +1,49 @@
 package com.example.bookclub.data.db.dao
 
-import androidx.room.*
+import androidx.room.Dao
+import androidx.room.Insert
+import androidx.room.Query
 import com.example.bookclub.data.db.CommentEntity
 import kotlinx.coroutines.flow.Flow
+import java.time.Instant
 
 @Dao
 interface CommentDao {
+
     @Insert
     suspend fun insert(comment: CommentEntity): Long
 
-    @Query("SELECT * FROM comment WHERE clubId = :clubId AND parentId IS NULL ORDER BY createdAt DESC")
-    fun getTopLevel(clubId: Long): Flow<List<CommentEntity>>
+    // Comentarii top-level + autor (nickname/email)
+    @Query("""
+        SELECT 
+            c.id            AS id,
+            c.clubId        AS clubId,
+            c.userId        AS userId,
+            c.content       AS content,
+            c.createdAt     AS createdAt,
+            u.nickname      AS authorNickname,
+            u.email         AS authorEmail
+        FROM comment c
+        JOIN user u ON u.id = c.userId
+        WHERE c.clubId = :clubId AND c.parentId IS NULL
+        ORDER BY c.createdAt DESC
+    """)
+    fun getTopLevelWithAuthor(clubId: Long): Flow<List<CommentWithAuthor>>
 
     @Query("SELECT * FROM comment WHERE parentId = :parentId ORDER BY createdAt ASC")
     fun getReplies(parentId: Long): Flow<List<CommentEntity>>
 
     @Query("SELECT * FROM comment WHERE id = :id")
-    suspend fun getById(id: Long): com.example.bookclub.data.db.CommentEntity?
+    suspend fun getById(id: Long): CommentEntity?
 }
+
+/** DTO pentru JOIN (Room mapează după numele coloanelor aliate în query). */
+data class CommentWithAuthor(
+    val id: Long,
+    val clubId: Long,
+    val userId: Long,
+    val content: String,
+    val createdAt: Instant,
+    val authorNickname: String?,
+    val authorEmail: String
+)

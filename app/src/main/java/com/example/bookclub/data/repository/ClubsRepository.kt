@@ -103,13 +103,14 @@ class ClubsRepository(
 
     // Flow cu lista de comentarii (top level) ale clubului
     fun commentsFlow(clubId: Long): Flow<List<ClubComment>> =
-        commentDao.getTopLevel(clubId).map { list ->
+        commentDao.getTopLevelWithAuthor(clubId).map { list ->
             list.map { e ->
                 ClubComment(
                     id = e.id,
                     clubId = e.clubId,
-                    userId = e.userId,          // 👈 afișăm userId în UI
+                    userId = e.userId,
                     content = e.content,
+                    authorName = e.authorNickname?.takeIf { it.isNotBlank() } ?: e.authorEmail,
                     createdAt = e.createdAt
                 )
             }

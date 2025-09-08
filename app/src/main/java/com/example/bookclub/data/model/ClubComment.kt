@@ -6,6 +6,7 @@ data class ClubComment(
     val id: Long,
     val clubId: Long,
     val userId: Long,
+    val authorName: String,
     val content: String,
     val createdAt: Instant
 )

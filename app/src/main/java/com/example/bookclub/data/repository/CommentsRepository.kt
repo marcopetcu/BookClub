@@ -16,21 +16,21 @@ class CommentsRepository(
     private val voteDao: VoteDao,
     private val inboxDao: InboxDao
 ) {
-    /** Flow cu toate comentariile top-level pentru un club. */
+    /** Flow cu comentarii + autor (nickname/email). */
     fun getComments(clubId: Long): Flow<List<ClubComment>> =
-        commentDao.getTopLevel(clubId).map { list ->
-            list.map {
+        commentDao.getTopLevelWithAuthor(clubId).map { list ->
+            list.map { row ->
                 ClubComment(
-                    id = it.id,
-                    clubId = it.clubId,
-                    userId = it.userId,
-                    content = it.content,
-                    createdAt = it.createdAt
+                    id = row.id,
+                    clubId = row.clubId,
+                    userId = row.userId,
+                    authorName = row.authorNickname?.takeIf { it.isNotBlank() } ?: row.authorEmail,
+                    content = row.content,
+                    createdAt = row.createdAt
                 )
             }
         }
 
-    /** Adaugă un comentariu nou. */
     suspend fun insertComment(
         clubId: Long,
         userId: Long,

@@ -26,7 +26,7 @@ class CommentsAdapter :
         private val txtContent: TextView = view.findViewById(R.id.txtContent)
 
         fun bind(item: ClubComment) {
-            txtAuthor.text = "User #${item.userId}"
+            txtAuthor.text = item.authorName
             txtTime.text   = formatter.format(item.createdAt.atZone(ZoneId.systemDefault()))
             txtContent.text = item.content
         }
