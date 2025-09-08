@@ -1,5 +1,7 @@
 package com.example.bookclub.ui.books
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import android.widget.Button
@@ -27,8 +29,9 @@ class BookDetailFragment : Fragment(R.layout.fragment_book_detail) {
     private lateinit var txtDescription: TextView
     private lateinit var btnFollow: Button
     private lateinit var btnCreateClub: Button
+    private lateinit var btnOpenWeb: Button   // ✅ nou
 
-    // TODO: ia userId/role reale din SessionManager (M3)
+    // TODO: ia userId/role reale din SessionManager
     private val userId = 1L
     private val isAdmin = true // TEMP
 
@@ -41,6 +44,7 @@ class BookDetailFragment : Fragment(R.layout.fragment_book_detail) {
         txtDescription = view.findViewById(R.id.txtDescription)
         btnFollow = view.findViewById(R.id.btnFollow)
         btnCreateClub = view.findViewById(R.id.btnCreateClub)
+        btnOpenWeb = view.findViewById(R.id.btnOpenWeb) // ✅ init
 
         val workId = args.workId
 
@@ -59,7 +63,6 @@ class BookDetailFragment : Fragment(R.layout.fragment_book_detail) {
 
                     is UiState.Loading -> {
                         btnFollow.isEnabled = false
-                        // poți afișa un loader dacă vrei
                     }
 
                     is UiState.Success -> {
@@ -79,7 +82,7 @@ class BookDetailFragment : Fragment(R.layout.fragment_book_detail) {
                             error(R.drawable.ic_book_placeholder)
                         }
 
-                        // Create Club → folosim Safe Args (setăm PARAMETRII explicit)
+                        // Create Club → folosim Safe Args
                         btnCreateClub.setOnClickListener {
                             val action =
                                 BookDetailFragmentDirections
@@ -90,6 +93,13 @@ class BookDetailFragment : Fragment(R.layout.fragment_book_detail) {
                                         coverUrl = d.coverUrl ?: args.coverUrl
                                     )
                             findNavController().navigate(action)
+                        }
+
+                        // ✅ Open Book Page → browser
+                        btnOpenWeb.setOnClickListener {
+                            val url = "https://openlibrary.org/works/${args.workId}"
+                            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+                            startActivity(intent)
                         }
                     }
 
