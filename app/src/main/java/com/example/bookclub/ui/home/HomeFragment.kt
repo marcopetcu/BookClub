@@ -11,12 +11,10 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.bookclub.R
-import com.example.bookclub.data.db.BookClubEntity
 import com.example.bookclub.ui.club.ClubsViewModel
-import kotlinx.coroutines.launch
-
-// dacă ai mutat adapterul în alt pachet, ajustează importul
+import com.example.bookclub.ui.club.UiClub
 import com.example.bookclub.ui.club.ClubsAdapter
+import kotlinx.coroutines.launch
 
 class HomeFragment : Fragment(R.layout.fragment_home) {
 
@@ -25,35 +23,46 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val recycler = view.findViewById<RecyclerView>(R.id.recyclerClubs)
-        val empty = view.findViewById<TextView>(R.id.txtEmpty)
+        val recycler: RecyclerView = view.findViewById(R.id.recyclerClubs)
+        val empty: TextView = view.findViewById(R.id.txtEmpty)
 
         val adapter = ClubsAdapter(
-            onClick = { club: BookClubEntity ->
-                // navigare cu Safe Args — PASĂM ARGUMENTELE DIRECT ÎN FUNCȚIE
-                val action = HomeFragmentDirections.actionHomeFragmentToClubDetailFragment(
-                    clubId = club.id,
-                    title = club.title,
-                    coverUrl = club.coverUrl ?: ""
-                )
-                findNavController().navigate(action)
-            },
-            onJoinClick = { club: BookClubEntity ->
-                val userId = 1L // TODO: din SessionManager
-                viewLifecycleOwner.lifecycleScope.launch {
-                    try {
-                        viewModel.joinClub(userId, club.id)
+            onPrimaryClick = { ui ->
+                if (ui.isMember) {
+                    val action = HomeFragmentDirections.actionHomeFragmentToClubDetailFragment(
+                        clubId = ui.club.id,
+                        title = ui.club.title,
+                        coverUrl = ui.club.coverUrl ?: ""
+                    )
+                    findNavController().navigate(action)
+                } else {
+                    viewLifecycleOwner.lifecycleScope.launch {
+                        viewModel.joinClub(ui.club.id)
                         Toast.makeText(requireContext(), getString(R.string.joined_club), Toast.LENGTH_SHORT).show()
-
+                        // poți naviga automat după join, dacă vrei:
                         val action = HomeFragmentDirections.actionHomeFragmentToClubDetailFragment(
-                            clubId = club.id,
-                            title = club.title,
-                            coverUrl = club.coverUrl ?: ""
+                            clubId = ui.club.id,
+                            title = ui.club.title,
+                            coverUrl = ui.club.coverUrl ?: ""
                         )
                         findNavController().navigate(action)
-                    } catch (t: Throwable) {
-                        Toast.makeText(requireContext(), t.message ?: "Join failed", Toast.LENGTH_LONG).show()
                     }
+                }
+            },
+            onLeaveClick = { ui ->
+                viewLifecycleOwner.lifecycleScope.launch {
+                    viewModel.leaveClub(ui.club.id)
+                    Toast.makeText(requireContext(), getString(R.string.left_club), Toast.LENGTH_SHORT).show()
+                }
+            },
+            onCardClick = { ui ->
+                if (ui.isMember) {
+                    val action = HomeFragmentDirections.actionHomeFragmentToClubDetailFragment(
+                        clubId = ui.club.id,
+                        title = ui.club.title,
+                        coverUrl = ui.club.coverUrl ?: ""
+                    )
+                    findNavController().navigate(action)
                 }
             }
         )
@@ -63,7 +72,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         recycler.adapter = adapter
 
         viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.clubs.collect { list ->
+            viewModel.uiClubs.collect { list ->
                 adapter.submitList(list)
                 empty.visibility = if (list.isEmpty()) View.VISIBLE else View.GONE
             }

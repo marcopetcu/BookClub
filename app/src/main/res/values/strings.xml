@@ -63,4 +63,18 @@
     <string name="placeholder_author">Author</string>
     <string name="club_header_default">Club</string>
 
+    <string name="left_club">Left club</string>
+    <string name="join_failed">Join failed</string>
+    <string name="leave_failed">Leave failed</string>
+
+    <!--vedem daca le folosim-->
+    <string name="action_join">Join</string>
+    <string name="action_open">Open</string>
+    <string name="action_leave">Leave</string>
+
+    <string name="club_join">Join</string>
+    <string name="club_open">Open</string>
+    <string name="club_leave">Leave</string>
+
+
 </resources>

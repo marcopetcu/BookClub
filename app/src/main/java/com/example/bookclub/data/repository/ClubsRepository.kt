@@ -14,26 +14,22 @@ class ClubsRepository(
     private val membershipDao: MembershipDao,
     private val followBookDao: FollowBookDao,
     private val inboxDao: InboxDao,
-    private val commentDao: CommentDao   // ✅ ADĂUGAT: pentru comentarii
+    private val commentDao: CommentDao
 ) {
     fun listAll(): Flow<List<BookClubEntity>> = clubDao.getAllOrderByStart()
-
-    /** DAO adaugă wildcard în SQL, deci trimitem DOAR query-ul */
     fun search(query: String): Flow<List<BookClubEntity>> = clubDao.search(query)
-
     fun listForUser(userId: Long): Flow<List<BookClubEntity>> =
         membershipDao.getClubsForUser(userId)
-
     fun listForFollowedBooks(userId: Long): Flow<List<BookClubEntity>> =
         clubDao.listForFollowedBooks(userId)
 
-    /**
-     * Creează un club și returnează id-ul.
-     * - blochează dublurile ACTIVE (SCHEDULED/LIVE) pe același workId
-     * - status: SCHEDULED dacă startAt > now, altfel LIVE
-     * - closeAt = startAt + 72h
-     * - notifică followerii cărții în Inbox
-     */
+    // ✅ NOU: Flow cu setul clubId-urilor unde userul e membru (pentru UI)
+    fun membershipsForUser(userId: Long): Flow<Set<Long>> =
+        membershipDao.getClubIdsForUser(userId).map { it.toSet() }
+
+    // opțional, dacă îți mai trebuie punctual
+    suspend fun isMember(userId: Long, clubId: Long) = membershipDao.isMember(userId, clubId)
+
     suspend fun createClub(
         adminId: Long,
         workId: String,
@@ -46,11 +42,9 @@ class ClubsRepository(
         if (clubDao.existsActiveForWork(workId)) {
             throw IllegalStateException("Active club already exists for this work")
         }
-
         val now = Instant.now()
         val status = if (startAt.isAfter(now)) ClubStatus.SCHEDULED else ClubStatus.LIVE
         val closeAt = startAt.plus(Duration.ofHours(72))
-
         val clubId = clubDao.insert(
             BookClubEntity(
                 id = 0L,
@@ -65,8 +59,6 @@ class ClubsRepository(
                 closeAt = closeAt
             )
         )
-
-        // Notifică followerii cărții
         val followers = followBookDao.getFollowerIdsForWork(workId)
         followers.forEach { uid ->
             inboxDao.insert(
@@ -99,9 +91,7 @@ class ClubsRepository(
         membershipDao.delete(userId, clubId)
     }
 
-    /* ======================= Comentarii ======================= */
-
-    // Flow cu lista de comentarii (top level) ale clubului
+    /* ===== comentarii – las exact cum le ai ===== */
     fun commentsFlow(clubId: Long): Flow<List<ClubComment>> =
         commentDao.getTopLevelWithAuthor(clubId).map { list ->
             list.map { e ->
@@ -116,7 +106,6 @@ class ClubsRepository(
             }
         }
 
-    // Inseră un comentariu nou (parentId poate fi null)
     suspend fun addComment(
         clubId: Long,
         userId: Long,

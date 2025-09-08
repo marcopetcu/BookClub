@@ -1,19 +1,22 @@
 package com.example.bookclub.data.db.dao
 
-import androidx.room.*
+import androidx.room.Dao
+import androidx.room.Query
+import androidx.room.Upsert
+import com.example.bookclub.data.db.BookClubEntity
 import com.example.bookclub.data.db.MembershipEntity
 import kotlinx.coroutines.flow.Flow
-import com.example.bookclub.data.db.BookClubEntity
 
-// DAO Room pentru Membership: metode CRUD si query-uri specifice
 @Dao
 interface MembershipDao {
+
     @Upsert
     suspend fun upsert(m: MembershipEntity)
 
     @Query("DELETE FROM membership WHERE userId = :userId AND clubId = :clubId")
     suspend fun delete(userId: Long, clubId: Long)
 
+    // păstrează asta dacă o folosești în altă parte
     @Query("""
         SELECT bc.* FROM bookclub bc
         INNER JOIN membership m ON m.clubId = bc.id
@@ -21,6 +24,10 @@ interface MembershipDao {
         ORDER BY bc.startAt ASC
     """)
     fun getClubsForUser(userId: Long): Flow<List<BookClubEntity>>
+
+    // ✅ NOU: flow cu toate clubId-urile unde userul e membru (necesar pentru UI Join/Open/Leave)
+    @Query("SELECT clubId FROM membership WHERE userId = :userId")
+    fun getClubIdsForUser(userId: Long): Flow<List<Long>>
 
     @Query("SELECT EXISTS(SELECT 1 FROM membership WHERE userId = :userId AND clubId = :clubId)")
     suspend fun isMember(userId: Long, clubId: Long): Boolean

@@ -40,6 +40,13 @@ class SessionManager(context: Context) {
         prefs.edit().clear().apply()
     }
 
+    // 👇 adăugat pentru acces rapid la userId curent
+    val currentUserId: Long?
+        get() = if (isLoggedIn()) prefs.getLong(KEY_USER_ID, -1L) else null
+
+    val currentNickname: String?
+        get() = if (isLoggedIn()) prefs.getString(KEY_NICKNAME, null) else null
+
     companion object {
         private const val KEY_USER_ID = "user_id"
         private const val KEY_EMAIL = "email"
