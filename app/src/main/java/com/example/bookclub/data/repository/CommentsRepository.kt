@@ -16,21 +16,26 @@ class CommentsRepository(
     private val voteDao: VoteDao,
     private val inboxDao: InboxDao
 ) {
-    /** Flow cu comentarii + autor (nickname/email). */
+
+    /** Flow cu comentarii top-level + autor (nickname/email). */
     fun getComments(clubId: Long): Flow<List<ClubComment>> =
-        commentDao.getTopLevelWithAuthor(clubId).map { list ->
-            list.map { row ->
+        commentDao.getTopLevelWithAuthor(clubId).map { rows ->
+            rows.map { row ->
                 ClubComment(
                     id = row.id,
                     clubId = row.clubId,
                     userId = row.userId,
-                    authorName = row.authorNickname?.takeIf { it.isNotBlank() } ?: row.authorEmail,
+                    // nickname > email > "Anonymous"
+                    authorName = row.authorNickname?.takeIf { it.isNotBlank() }
+                        ?: row.authorEmail?.takeIf { it.isNotBlank() }
+                        ?: "Anonymous",
                     content = row.content,
                     createdAt = row.createdAt
                 )
             }
         }
 
+    /** Inserează comentariu (opțional ca reply dacă parentId != null) și notifică autorul părintelui. */
     suspend fun insertComment(
         clubId: Long,
         userId: Long,
@@ -64,6 +69,7 @@ class CommentsRepository(
         return id
     }
 
+    /** Vote (1 / -1) pe comentariu — upsert. */
     suspend fun vote(commentId: Long, userId: Long, value: Int) {
         val v = if (value >= 0) 1 else -1
         voteDao.upsert(

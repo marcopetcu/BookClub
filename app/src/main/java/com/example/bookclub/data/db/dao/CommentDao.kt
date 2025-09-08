@@ -38,6 +38,8 @@ interface CommentDao {
     suspend fun getById(id: Long): CommentEntity?
 }
 
+
+
 /** DTO pentru JOIN (Room mapează după numele coloanelor aliate în query). */
 data class CommentWithAuthor(
     val id: Long,

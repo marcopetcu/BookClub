@@ -16,6 +16,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import coil.load
 import com.example.bookclub.R
+import com.example.bookclub.data.ServiceLocator
 import kotlinx.coroutines.launch
 
 class ClubDetailFragment : Fragment(R.layout.fragment_club_detail) {
@@ -47,7 +48,8 @@ class ClubDetailFragment : Fragment(R.layout.fragment_club_detail) {
         val etComment: EditText = view.findViewById(R.id.etComment)
         val btnSend: Button     = view.findViewById(R.id.btnSend)
 
-        val currentUserId = 1L // TODO: ia din SessionManager
+        val session = ServiceLocator.sessionManager(requireContext()).get()
+        val currentUserId = session?.userId ?: 0L
 
         btnSend.setOnClickListener {
             val content = etComment.text?.toString()?.trim().orEmpty()

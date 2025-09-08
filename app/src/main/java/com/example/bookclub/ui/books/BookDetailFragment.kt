@@ -1,12 +1,12 @@
 package com.example.bookclub.ui.books
 
 import android.content.Intent
-import androidx.core.net.toUri
 import android.os.Bundle
 import android.view.View
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.core.net.toUri
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -15,6 +15,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import coil.load
 import com.example.bookclub.R
+import com.example.bookclub.data.ServiceLocator
 import com.example.bookclub.ui.common.UiState
 import kotlinx.coroutines.launch
 
@@ -29,11 +30,7 @@ class BookDetailFragment : Fragment(R.layout.fragment_book_detail) {
     private lateinit var txtDescription: TextView
     private lateinit var btnFollow: Button
     private lateinit var btnCreateClub: Button
-    private lateinit var btnOpenWeb: Button   // ✅ nou
-
-    // TODO: ia userId/role reale din SessionManager
-    private val userId = 1L
-    private val isAdmin = true // TEMP
+    private lateinit var btnOpenWeb: Button
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -44,18 +41,23 @@ class BookDetailFragment : Fragment(R.layout.fragment_book_detail) {
         txtDescription = view.findViewById(R.id.txtDescription)
         btnFollow = view.findViewById(R.id.btnFollow)
         btnCreateClub = view.findViewById(R.id.btnCreateClub)
-        btnOpenWeb = view.findViewById(R.id.btnOpenWeb) // ✅ init
+        btnOpenWeb = view.findViewById(R.id.btnOpenWeb)
 
         val workId = args.workId
 
-        // butonul Create Club vizibil doar pt ADMIN
-        btnCreateClub.visibility = if (isAdmin) View.VISIBLE else View.GONE
+        // ✅ Session & role – inside onViewCreated
+        val session = ServiceLocator.sessionManager(requireContext()).get()
+        val currentUserId = session?.userId ?: 0L
+        val isAdmin = session?.role?.trim()?.equals("admin", ignoreCase = true) == true
 
-        // încărcăm detalii + follow state
+        // Show Create Club only to admins
+        btnCreateClub.isVisible = isAdmin
+
+        // Load details + follow state
         viewModel.loadWorkDetails(workId)
-        viewModel.loadFollowState(userId, workId)
+        viewModel.loadFollowState(currentUserId, workId)
 
-        // observăm detaliile
+        // Observe details state
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.detailsState.collect { state ->
                 when (state) {
@@ -69,7 +71,6 @@ class BookDetailFragment : Fragment(R.layout.fragment_book_detail) {
                         btnFollow.isEnabled = true
                         val d = state.data
 
-                        // titlu / subjects / descriere / copertă
                         txtTitle.text = d.title.ifBlank { args.title }
                         txtSubjects.isVisible = d.subjects.isNotEmpty()
                         txtSubjects.text = d.subjects.joinToString(" • ")
@@ -82,24 +83,23 @@ class BookDetailFragment : Fragment(R.layout.fragment_book_detail) {
                             error(R.drawable.ic_book_placeholder)
                         }
 
-                        // Create Club → folosim Safe Args
+                        // Create Club (admins only)
                         btnCreateClub.setOnClickListener {
                             val action =
                                 BookDetailFragmentDirections
                                     .actionBookDetailFragmentToCreateBookClubFragment(
-                                        workId  = workId,
-                                        title   = d.title.ifBlank { args.title },
-                                        author  = args.author.ifBlank { "Unknown" },
+                                        workId = workId,
+                                        title = d.title.ifBlank { args.title },
+                                        author = args.author.ifBlank { "Unknown" },
                                         coverUrl = d.coverUrl ?: args.coverUrl
                                     )
                             findNavController().navigate(action)
                         }
 
-                        // ✅ Open Book Page → browser
+                        // Open book page in browser (OpenLibrary)
                         btnOpenWeb.setOnClickListener {
                             val url = "https://openlibrary.org/works/${args.workId}"
-                            val intent = Intent(Intent.ACTION_VIEW, url.toUri())
-                            startActivity(intent)
+                            startActivity(Intent(Intent.ACTION_VIEW, url.toUri()))
                         }
                     }
 
@@ -107,13 +107,13 @@ class BookDetailFragment : Fragment(R.layout.fragment_book_detail) {
                         val msg = state.throwable.message ?: getString(R.string.error_unknown)
                         txtDescription.text = getString(R.string.error_fmt, msg)
                         btnFollow.isEnabled = false
-                        btnCreateClub.visibility = View.GONE
+                        btnCreateClub.isVisible = false
                     }
                 }
             }
         }
 
-        // follow/unfollow – observăm starea
+        // Follow / Unfollow observe
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.isFollowed.collect { followed ->
                 btnFollow.text =
@@ -123,8 +123,11 @@ class BookDetailFragment : Fragment(R.layout.fragment_book_detail) {
         }
 
         btnFollow.setOnClickListener {
-            if (viewModel.isFollowed.value) viewModel.unfollowBook(userId, workId)
-            else viewModel.followBook(userId, workId)
+            if (viewModel.isFollowed.value) {
+                viewModel.unfollowBook(currentUserId, workId)
+            } else {
+                viewModel.followBook(currentUserId, workId)
+            }
             btnFollow.isEnabled = false
         }
     }
