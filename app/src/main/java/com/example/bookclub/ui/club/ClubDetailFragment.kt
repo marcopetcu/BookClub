@@ -24,6 +24,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
+/**
+ * Afișează DOAR comentariile părinte; replicile sunt încărcate lazy la expand.
+ */
 class ClubDetailFragment : Fragment(R.layout.fragment_club_detail) {
 
     private val args: ClubDetailFragmentArgs by navArgs()
@@ -31,14 +34,12 @@ class ClubDetailFragment : Fragment(R.layout.fragment_club_detail) {
 
     private var replyTo: ClubComment? = null
 
-    private val expanded = mutableSetOf<Long>()
-    private val repliesCache = mutableMapOf<Long, List<ClubComment>>()
-    private val repliesCount = mutableMapOf<Long, Int>()
+    private val expanded = mutableSetOf<Long>()                        // parentId-uri expandate
+    private val repliesCache = mutableMapOf<Long, List<ClubComment>>() // parentId -> lista replici
+    private val repliesCount = mutableMapOf<Long, Int>()               // parentId -> număr replici
 
     private lateinit var adapter: ThreadedCommentsAdapter
     private var latestParents: List<ClubComment> = emptyList()
-
-    private var canComment: Boolean = true
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -57,14 +58,18 @@ class ClubDetailFragment : Fragment(R.layout.fragment_club_detail) {
         val replyBar: View         = view.findViewById(R.id.replyBar)
         val tvReplyingTo: TextView = view.findViewById(R.id.tvReplyingTo)
         val btnCancelReply: Button = view.findViewById(R.id.btnCancelReply)
-        fun clearReply() { replyTo = null; replyBar.isVisible = false; tvReplyingTo.text = "" }
+
+        fun clearReply() {
+            replyTo = null
+            replyBar.isVisible = false
+            tvReplyingTo.text = ""
+        }
         btnCancelReply.setOnClickListener { clearReply() }
 
         // Recycler + adapter
         val recycler: RecyclerView = view.findViewById(R.id.recyclerComments)
         adapter = ThreadedCommentsAdapter(
             onReplyClick = { comment ->
-                if (!canComment) return@ThreadedCommentsAdapter
                 replyTo = comment
                 tvReplyingTo.text = getString(
                     R.string.replying_to_fmt,
@@ -72,8 +77,9 @@ class ClubDetailFragment : Fragment(R.layout.fragment_club_detail) {
                 )
                 replyBar.isVisible = true
             },
-            onToggleParent = { parentId, currentlyExpanded -> toggleParent(parentId, currentlyExpanded) },
-            canReply = true // va fi actualizat din live-state mai jos
+            onToggleParent = { parentId, currentlyExpanded ->
+                toggleParent(parentId, currentlyExpanded)
+            }
         )
         recycler.layoutManager = LinearLayoutManager(requireContext())
         recycler.adapter = adapter
@@ -81,39 +87,39 @@ class ClubDetailFragment : Fragment(R.layout.fragment_club_detail) {
         // Input & send
         val etComment: EditText = view.findViewById(R.id.etComment)
         val btnSend: Button     = view.findViewById(R.id.btnSend)
+
         val session = ServiceLocator.sessionManager(requireContext()).get()
         val currentUserId = session?.userId ?: 1L
 
         btnSend.setOnClickListener {
-            if (!canComment) return@setOnClickListener
             val content = etComment.text?.toString()?.trim().orEmpty()
-            if (content.isNotEmpty()) {
-                viewLifecycleOwner.lifecycleScope.launch {
-                    val parentId = replyTo?.id
-                    vm.postComment(args.clubId, currentUserId, content, parentId)
-                    if (parentId != null) refreshRepliesForParent(parentId)
-                    etComment.text?.clear()
-                    clearReply()
+            if (content.isEmpty()) return@setOnClickListener
+
+            val parentId = replyTo?.id
+            viewLifecycleOwner.lifecycleScope.launch {
+                // ➜ Inserăm și AȘTEPTĂM (evită cursa dintre insert și fetch)
+                vm.addCommentAwait(
+                    clubId = args.clubId,
+                    userId = currentUserId,
+                    content = content,
+                    parentId = parentId
+                )
+
+                etComment.text?.clear()
+                clearReply()
+
+                if (parentId != null) {
+                    // ne asigurăm că secțiunea e deschisă și reîncărcăm replicile părintelui
+                    expanded.add(parentId)
+                    refreshReplies(parentId)
                 }
+                // Dacă e top-level, părinții vin automat via Flow și se reafișează
             }
         }
 
-        // ✅ LIVE / non-LIVE → controlează UI + Reply din adapter
-        vm.observeLiveState(args.clubId)
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                vm.isCommentingAllowed.collect { allowed ->
-                    canComment = allowed
-                    etComment.isEnabled = allowed
-                    btnSend.isEnabled = allowed
-                    if (!allowed) clearReply()
-                    adapter.setCanReply(allowed)   // <<—— ascunde/arata „Reply” în listă
-                }
-            }
-        }
-
-        // Doar PĂRINȚII
+        // Observăm doar părinții
         vm.observeComments(args.clubId)
+
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 vm.comments.collect { parents ->
@@ -124,6 +130,17 @@ class ClubDetailFragment : Fragment(R.layout.fragment_club_detail) {
         }
     }
 
+    /** Re-încarcă replicile unui părinte și reconstruiește lista. */
+    private fun refreshReplies(parentId: Long) {
+        viewLifecycleOwner.lifecycleScope.launch {
+            val replies = withContext(Dispatchers.IO) { vm.fetchReplies(parentId) }
+            repliesCache[parentId] = replies
+            repliesCount[parentId] = replies.size
+            buildAndShowThread()
+        }
+    }
+
+    /** Expand / Collapse pentru un părinte. */
     private fun toggleParent(parentId: Long, currentlyExpanded: Boolean) {
         viewLifecycleOwner.lifecycleScope.launch {
             if (currentlyExpanded) {
@@ -141,34 +158,34 @@ class ClubDetailFragment : Fragment(R.layout.fragment_club_detail) {
         }
     }
 
-    private suspend fun refreshRepliesForParent(parentId: Long) {
-        val replies = withContext(Dispatchers.IO) { vm.fetchReplies(parentId) }
-        repliesCache[parentId] = replies
-        repliesCount[parentId] = replies.size
-        buildAndShowThread()
-    }
-
+    /** Convertește părinți + (opțional) copii în listă plată de ThreadItem pentru adapter. */
     private fun buildAndShowThread() {
         val items = mutableListOf<ThreadItem>()
+
         for (parent in latestParents) {
             val count = repliesCount[parent.id]
+
             items += ThreadItem.Parent(
                 comment = parent,
                 isExpanded = parent.id in expanded,
                 repliesCount = count
             )
+
             if (parent.id in expanded) {
                 repliesCache[parent.id].orEmpty().forEach { child ->
                     items += ThreadItem.Reply(child)
                 }
-            } else if (count == null) {
-                viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
-                    val c = vm.countReplies(parent.id)
-                    repliesCount[parent.id] = c
-                    withContext(Dispatchers.Main) { buildAndShowThread() }
+            } else {
+                if (count == null) {
+                    viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
+                        val c = vm.countReplies(parent.id)
+                        repliesCount[parent.id] = c
+                        withContext(Dispatchers.Main) { buildAndShowThread() }
+                    }
                 }
             }
         }
+
         adapter.submitList(items)
     }
 }
