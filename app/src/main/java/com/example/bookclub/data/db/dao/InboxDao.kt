@@ -1,3 +1,4 @@
+// file: com/example/bookclub/data/db/dao/InboxDao.kt
 package com.example.bookclub.data.db.dao
 
 import androidx.room.Dao
@@ -10,13 +11,10 @@ import kotlinx.coroutines.flow.Flow
 interface InboxDao {
 
     @Insert
-    suspend fun insert(item: InboxEntity)
+    suspend fun insert(e: InboxEntity): Long
 
     @Query("SELECT * FROM inbox WHERE userId = :userId ORDER BY createdAt DESC")
-    fun streamForUser(userId: Long): Flow<List<InboxEntity>>
-
-    @Query("SELECT COUNT(*) FROM inbox WHERE userId = :userId AND isRead = 0")
-    fun unreadCount(userId: Long): Flow<Int>
+    fun listForUser(userId: Long): Flow<List<InboxEntity>>
 
     @Query("UPDATE inbox SET isRead = 1 WHERE id = :id")
     suspend fun markRead(id: Long)

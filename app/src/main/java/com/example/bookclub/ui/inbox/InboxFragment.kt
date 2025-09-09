@@ -1,3 +1,4 @@
+// file: com/example/bookclub/ui/inbox/InboxFragment.kt
 package com.example.bookclub.ui.inbox
 
 import android.os.Bundle
@@ -19,31 +20,31 @@ class InboxFragment : Fragment(R.layout.fragment_inbox) {
     private val vm: InboxViewModel by viewModels()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
         val recycler: RecyclerView = view.findViewById(R.id.recyclerInbox)
         val btnMarkAll: Button = view.findViewById(R.id.btnMarkAll)
 
-        val adapter = InboxAdapter { item, parsed ->
+        val adapter = InboxAdapter { item ->
+            // item are valori non-null (datorită mapper-ului)
+            val action = InboxFragmentDirections
+                .actionInboxFragmentToClubDetailFragment(
+                    clubId = item.clubId,
+                    title = item.title,
+                    coverUrl = item.coverUrl ?: ""   // SafeArgs cere String (nu String?)
+                )
+            findNavController().navigate(action)
             vm.markRead(item.id)
-            parsed.clubId?.let { clubId ->
-                // navighează la detaliu club (ajustează direcția după graficul tău)
-                val action = InboxFragmentDirections
-                    .actionInboxFragmentToClubDetailFragment(
-                        clubId = clubId,
-                        title = parsed.title,
-                        coverUrl = "" // dacă vrei, pune cover din payload
-                    )
-                findNavController().navigate(action)
-            }
         }
 
         recycler.layoutManager = LinearLayoutManager(requireContext())
         recycler.adapter = adapter
 
-        btnMarkAll.setOnClickListener { vm.markAll() }
+        btnMarkAll.setOnClickListener { vm.markAllRead() }
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                vm.items.collect { adapter.submitList(it) }
+                vm.items.collect { list -> adapter.submitList(list) }
             }
         }
     }

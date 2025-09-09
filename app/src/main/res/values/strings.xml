@@ -86,30 +86,19 @@
     <string name="hide_replies">Hide replies</string>
 
     <string name="cancel">Cancel</string>
-
-
     <string name="show_replies_fmt">Show replies (%1$d)</string>
     <string name="hide_replies_fmt">Hide replies (%1$d)</string>
-
-
     <string name="show_replies_fallback">Show replies</string>
-
     <string name="anonymous">Anonymous</string>
-
-
-
     <string name="see_replies_fmt">See replies (%1$d)</string>
-
     <string name="see_replies_loading">See replies</string>
-
     <string name="comments_read_only">Read-only: comments are available only while the event is LIVE.</string>
-
-
     <string name="inbox_new_club">New club scheduled</string>
     <string name="mark_all_read">Mark all as read</string>
-
-
-        <!-- ... restul stringurilor existente ... -->
-
-
+    <string name="inbox_new_club_for_followed_book">New club for a book you follow</string>
+    <string name="starts_at_fmt">Starts at %1$s</string>
+    <string name="unknown_title">Untitled</string>
+    <string name="inbox_mark_all">Mark all read</string>
+    <string name="no_items">No Items</string>
+    <string name="default_nickname">NICKNAME DEFAULT</string>
 </resources>

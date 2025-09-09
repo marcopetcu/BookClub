@@ -1,3 +1,4 @@
+// file: com/example/bookclub/data/repository/ClubsRepository.kt
 package com.example.bookclub.data.repository
 
 import com.example.bookclub.data.db.*
@@ -6,6 +7,7 @@ import com.example.bookclub.data.model.ClubComment
 import com.example.bookclub.data.model.ClubStatus
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import org.json.JSONObject
 import java.time.Duration
 import java.time.Instant
 
@@ -25,13 +27,17 @@ class ClubsRepository(
 
     fun clubFlow(clubId: Long) = clubDao.getByIdFlow(clubId)
 
-    // ✅ NOU: Flow cu setul clubId-urilor unde userul e membru (pentru UI)
+    // Flow cu setul clubId-urilor unde userul e membru (pentru UI)
     fun membershipsForUser(userId: Long): Flow<Set<Long>> =
         membershipDao.getClubIdsForUser(userId).map { it.toSet() }
 
-    // opțional, dacă îți mai trebuie punctual
+    // Punctual
     suspend fun isMember(userId: Long, clubId: Long) = membershipDao.isMember(userId, clubId)
 
+    /**
+     * Creează clubul și notifică followerii cărții (inbox items) cu payload bogat:
+     * type, clubId, workId, title, coverUrl, startAt.
+     */
     suspend fun createClub(
         adminId: Long,
         workId: String,
@@ -44,9 +50,11 @@ class ClubsRepository(
         if (clubDao.existsActiveForWork(workId)) {
             throw IllegalStateException("Active club already exists for this work")
         }
+
         val now = Instant.now()
         val status = if (startAt.isAfter(now)) ClubStatus.SCHEDULED else ClubStatus.LIVE
         val closeAt = startAt.plus(Duration.ofHours(72))
+
         val clubId = clubDao.insert(
             BookClubEntity(
                 id = 0L,
@@ -61,28 +69,65 @@ class ClubsRepository(
                 closeAt = closeAt
             )
         )
+
+        // notifică followerii cărții
         val followers = followBookDao.getFollowerIdsForWork(workId)
+
+        val payload = """
+            {
+              "type":"NEW_CLUB_FOR_FOLLOWED_BOOK",
+              "clubId":$clubId,
+              "workId":${JSONObject.quote(workId)},
+              "title":${JSONObject.quote(title)},
+              "coverUrl":${JSONObject.quote(coverUrl ?: "")},
+              "startAt":${JSONObject.quote(startAt.toString())}
+            }
+        """.trimIndent()
+
+        val inboxNow = Instant.now()
         followers.forEach { uid ->
             inboxDao.insert(
                 InboxEntity(
                     userId = uid,
                     type = "NEW_CLUB_FOR_FOLLOWED_BOOK",
-                    payloadJson = """{"clubId":$clubId,"workId":"$workId","title":"$title"}""",
+                    payloadJson = payload,
                     isRead = false,
-                    createdAt = now
+                    createdAt = inboxNow
                 )
             )
         }
+
         return clubId
     }
 
+    /**
+     * Userul se alătură unui club -> trimitem un inbox item cu payload bogat
+     * (ca să nu mai apară "Untitled" în Inbox).
+     */
     suspend fun joinClub(userId: Long, clubId: Long) {
         membershipDao.upsert(MembershipEntity(clubId = clubId, userId = userId))
+
+        val club = clubDao.getById(clubId)
+        val payload = if (club != null) {
+            """
+            {
+              "type":"JOIN_CONFIRMED",
+              "clubId":$clubId,
+              "title":${JSONObject.quote(club.title)},
+              "coverUrl":${JSONObject.quote(club.coverUrl ?: "")},
+              "startAt":${JSONObject.quote(club.startAt.toString())}
+            }
+            """.trimIndent()
+        } else {
+            // fallback minim dacă (teoretic) nu găsim clubul
+            """{"type":"JOIN_CONFIRMED","clubId":$clubId}"""
+        }
+
         inboxDao.insert(
             InboxEntity(
                 userId = userId,
                 type = "JOIN_CONFIRMED",
-                payloadJson = """{"clubId":$clubId}""",
+                payloadJson = payload,
                 isRead = false,
                 createdAt = Instant.now()
             )
@@ -93,7 +138,7 @@ class ClubsRepository(
         membershipDao.delete(userId, clubId)
     }
 
-    /* ===== comentarii – las exact cum le ai ===== */
+    /* ===== Comentarii ===== */
     fun commentsFlow(clubId: Long): Flow<List<ClubComment>> =
         commentDao.getTopLevelWithAuthor(clubId).map { list ->
             list.map { e ->
@@ -111,7 +156,7 @@ class ClubsRepository(
     suspend fun getClub(id: Long): BookClubEntity? = clubDao.getById(id)
 
     fun isLive(club: BookClubEntity): Boolean {
-        val now = java.time.Instant.now()
+        val now = Instant.now()
         return now.isAfter(club.startAt) && now.isBefore(club.closeAt)
     }
 
@@ -132,4 +177,11 @@ class ClubsRepository(
             )
         )
     }
+
+    /**
+     * Mic helper: titlu + copertă pentru un club (poate fi folosit ca lookup).
+     * (Dacă ai definit `ClubLite` în `InboxRepository`, îl poți reutiliza.)
+     */
+    suspend fun getLiteById(id: Long): ClubLite? =
+        clubDao.getById(id)?.let { ClubLite(title = it.title, coverUrl = it.coverUrl) }
 }
