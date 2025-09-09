@@ -101,4 +101,6 @@
     <string name="inbox_mark_all">Mark all read</string>
     <string name="no_items">No Items</string>
     <string name="default_nickname">NICKNAME DEFAULT</string>
+    <string name="cover">Cover</string>
+    <string name="profile_picture">Profile picture</string>
 </resources>

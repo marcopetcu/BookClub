@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -31,7 +33,9 @@
             android:id="@+id/img_avatar"
             android:layout_width="96dp"
             android:layout_height="96dp"
-            android:src="@drawable/ic_person"/>
+            android:src="@drawable/ic_person"
+            android:contentDescription="@string/profile_picture"
+            android:layout_marginBottom="16dp" />
 
         <!-- Nume utilizator -->
         <TextView
@@ -53,12 +57,32 @@
             android:textColor="@android:color/darker_gray"
             android:layout_marginBottom="24dp" />
 
+        <!-- Titlu lista Followed -->
+        <TextView
+            android:id="@+id/txt_follow_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Followed Books with Active Clubs"
+            android:textStyle="bold"
+            android:textSize="16sp"
+            android:layout_marginTop="24dp"
+            android:visibility="gone"/>
+
+        <!-- Recycler pentru follow-uri -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerFollowed"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:nestedScrollingEnabled="false"
+            android:visibility="gone"
+            tools:listitem="@layout/item_followed"/>
+
         <!-- Buton logout -->
         <Button
             android:id="@+id/btn_logout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
             android:text="@string/logout" />
     </LinearLayout>
-
 </androidx.constraintlayout.widget.ConstraintLayout>
