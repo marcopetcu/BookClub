@@ -103,4 +103,5 @@
     <string name="default_nickname">NICKNAME DEFAULT</string>
     <string name="cover">Cover</string>
     <string name="profile_picture">Profile picture</string>
+    <string name="comments_disabled">Comment disabled</string>
 </resources>

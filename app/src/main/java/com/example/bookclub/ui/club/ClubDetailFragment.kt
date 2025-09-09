@@ -20,6 +20,7 @@ import coil.load
 import com.example.bookclub.R
 import com.example.bookclub.data.ServiceLocator
 import com.example.bookclub.data.model.ClubComment
+import com.example.bookclub.data.model.ClubStatus
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -88,16 +89,37 @@ class ClubDetailFragment : Fragment(R.layout.fragment_club_detail) {
         val etComment: EditText = view.findViewById(R.id.etComment)
         val btnSend: Button     = view.findViewById(R.id.btnSend)
 
+        // Toggle UI pentru comentarii
+        val commentSection: View = view.findViewById(R.id.commentSection)
+        val tvCommentsDisabled: TextView = view.findViewById(R.id.tvCommentsDisabled)
+
         val session = ServiceLocator.sessionManager(requireContext()).get()
         val currentUserId = session?.userId ?: 1L
+        val repo = ServiceLocator.clubsRepository(requireContext())
+
+        var commentsAllowed = false
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            val club = withContext(Dispatchers.IO) { repo.getClub(args.clubId) }
+            commentsAllowed = club != null &&
+                    club.status == ClubStatus.LIVE &&
+                    repo.isLive(club!!)
+
+            commentSection.isVisible = commentsAllowed
+            tvCommentsDisabled.isVisible = !commentsAllowed
+
+            etComment.isEnabled = commentsAllowed
+            btnSend.isEnabled = commentsAllowed
+        }
 
         btnSend.setOnClickListener {
+            if (!commentsAllowed) return@setOnClickListener
+
             val content = etComment.text?.toString()?.trim().orEmpty()
             if (content.isEmpty()) return@setOnClickListener
 
             val parentId = replyTo?.id
             viewLifecycleOwner.lifecycleScope.launch {
-                // ➜ Inserăm și AȘTEPTĂM (evită cursa dintre insert și fetch)
                 vm.addCommentAwait(
                     clubId = args.clubId,
                     userId = currentUserId,
@@ -109,11 +131,9 @@ class ClubDetailFragment : Fragment(R.layout.fragment_club_detail) {
                 clearReply()
 
                 if (parentId != null) {
-                    // ne asigurăm că secțiunea e deschisă și reîncărcăm replicile părintelui
                     expanded.add(parentId)
                     refreshReplies(parentId)
                 }
-                // Dacă e top-level, părinții vin automat via Flow și se reafișează
             }
         }
 

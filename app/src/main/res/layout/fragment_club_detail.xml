@@ -32,6 +32,16 @@
             android:ellipsize="end" />
     </LinearLayout>
 
+    <!-- Mesaj când comentariile sunt dezactivate -->
+    <TextView
+        android:id="@+id/tvCommentsDisabled"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="8dp"
+        android:text="@string/comments_disabled"
+        android:textColor="@android:color/darker_gray"
+        android:visibility="gone" />
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerComments"
         android:layout_width="match_parent"
@@ -64,8 +74,9 @@
             android:text="@string/cancel" />
     </LinearLayout>
 
-    <!-- Input -->
+    <!-- Containerul input-ului de comentarii -->
     <LinearLayout
+        android:id="@+id/commentSection"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
