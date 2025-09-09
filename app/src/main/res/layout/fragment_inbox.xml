@@ -1,30 +1,48 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    android:layout_height="match_parent">
 
-    <LinearLayout
+    <!-- Titlu -->
+    <TextView
+        android:id="@+id/txtHeader"
         android:layout_width="0dp"
-        android:background="@color/white"
-        app:layout_constraintWidth_percent="0.8"
         android:layout_height="wrap_content"
-        app:layout_constraintVertical_bias="0.1"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
+        android:text="@string/inbox"
+        android:textStyle="bold"
+        android:textSize="18sp"
+        android:gravity="center"
+        android:paddingStart="@dimen/default_space"
+        android:paddingEnd="@dimen/default_space"
+        android:paddingTop="@dimen/default_space"
+        android:paddingBottom="@dimen/default_space"
         app:layout_constraintTop_toTopOf="parent"
-        android:orientation="vertical"
-        android:padding="@dimen/default_space">
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/inbox"
-            android:gravity="center"
-            android:padding="@dimen/default_space"
-            />
+    <!-- Lista de mesaje -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerInbox"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:paddingStart="@dimen/default_space"
+        android:paddingEnd="@dimen/default_space"
+        app:layout_constraintTop_toBottomOf="@id/txtHeader"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/btnMarkAll" />
 
-    </LinearLayout>
+    <!-- Buton "Mark all as read" -->
+    <Button
+        android:id="@+id/btnMarkAll"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="@string/mark_all_read"
+        android:layout_margin="@dimen/default_space"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

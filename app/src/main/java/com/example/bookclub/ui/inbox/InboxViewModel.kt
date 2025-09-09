@@ -5,22 +5,22 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.bookclub.data.ServiceLocator
 import com.example.bookclub.data.db.InboxEntity
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 class InboxViewModel(app: Application) : AndroidViewModel(app) {
+    private val session = ServiceLocator.sessionManager(app)
     private val repo = ServiceLocator.inboxRepository(app)
-    private val userId = MutableStateFlow<Long?>(null)
-    fun setUser(id: Long) { userId.value = id }
+    private val userId get() = session.currentUserId ?: 1L
 
-    val inbox: Flow<List<InboxEntity>> =
-        userId.flatMapLatest { id -> id?.let { repo.inboxForUser(it) } ?: flowOf(emptyList()) }
+    val items: StateFlow<List<InboxEntity>> =
+        repo.stream(userId).stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+
+    val unread: StateFlow<Int> =
+        repo.unreadCount(userId).stateIn(viewModelScope, SharingStarted.Eagerly, 0)
 
     fun markRead(id: Long) = viewModelScope.launch { repo.markRead(id) }
-    fun markAllRead() = viewModelScope.launch {
-        userId.value?.let { repo.markAllRead(it) }
-    }
+    fun markAll() = viewModelScope.launch { repo.markAllRead(userId) }
 }

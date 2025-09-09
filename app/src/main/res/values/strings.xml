@@ -105,6 +105,10 @@
     <string name="comments_read_only">Read-only: comments are available only while the event is LIVE.</string>
 
 
+    <string name="inbox_new_club">New club scheduled</string>
+    <string name="mark_all_read">Mark all as read</string>
+
+
         <!-- ... restul stringurilor existente ... -->
 
 

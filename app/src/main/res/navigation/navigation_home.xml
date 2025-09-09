@@ -33,8 +33,12 @@
     <fragment
         android:id="@+id/inboxFragment"
         android:name="com.example.bookclub.ui.inbox.InboxFragment"
-        android:label="InboxFragment"
-        tools:layout="@layout/fragment_inbox" />
+        android:label="Inbox">
+        <action
+            android:id="@+id/actionInboxFragmentToClubDetailFragment"
+            app:destination="@id/clubDetailFragment" />
+    </fragment>
+
 
     <!-- Profile -->
     <fragment
