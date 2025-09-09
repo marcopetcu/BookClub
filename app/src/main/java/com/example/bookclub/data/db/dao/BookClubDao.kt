@@ -65,6 +65,10 @@ interface BookClubDao {
     @Query("SELECT * FROM bookclub WHERE id = :id")
     suspend fun getById(id: Long): BookClubEntity?
 
+    @Query("SELECT * FROM bookclub WHERE id = :id LIMIT 1")
+    fun getByIdFlow(id: Long): kotlinx.coroutines.flow.Flow<BookClubEntity?>
+
+
     /** Upcoming/LIVE pentru cărțile urmărite (JOIN cu follow_book) */
     @Query("""
         SELECT bc.* FROM bookclub bc
@@ -75,6 +79,8 @@ interface BookClubDao {
           CASE bc.status WHEN 'LIVE' THEN 0 ELSE 1 END,
           bc.startAt ASC
     """)
+
+
     fun listForFollowedBooks(
         userId: Long,
         s1: ClubStatus = ClubStatus.SCHEDULED,

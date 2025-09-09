@@ -1,32 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:padding="8dp">
+    android:padding="12dp">
 
-    <TextView
-        android:id="@+id/txtAuthor"
-        android:layout_width="wrap_content"
+    <!-- Header (autor + dată) -->
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textStyle="bold"
-        android:text="User #0"
-        android:textSize="14sp" />
+        android:orientation="horizontal">
 
+        <TextView
+            android:id="@+id/txtAuthor"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textStyle="bold"
+            android:textColor="@android:color/black"
+            android:text="author" />
+
+        <TextView
+            android:id="@+id/txtDate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="12sp"
+            android:textColor="@android:color/darker_gray"
+            android:text="09 Sep 2025, 00:19" />
+    </LinearLayout>
+
+    <!-- Conținut -->
     <TextView
         android:id="@+id/txtContent"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Comment content"
-        android:textSize="14sp"
-        android:layout_marginTop="2dp" />
+        android:layout_marginTop="4dp"
+        android:text="content" />
 
-    <TextView
-        android:id="@+id/txtTime"
-        android:layout_width="wrap_content"
+    <!-- Linie acțiuni: Reply + Show/Hide replies -->
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="01 Jan 2025, 12:00"
-        android:textSize="12sp"
-        android:alpha="0.7"
-        android:layout_marginTop="2dp" />
+        android:orientation="horizontal"
+        android:layout_marginTop="6dp">
 
+        <TextView
+            android:id="@+id/btnReply"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/reply"
+            android:textStyle="bold"
+            android:paddingHorizontal="8dp"
+            android:paddingVertical="4dp" />
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+
+        <TextView
+            android:id="@+id/btnToggleReplies"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Show replies"
+            android:paddingHorizontal="8dp"
+            android:paddingVertical="4dp" />
+    </LinearLayout>
 </LinearLayout>

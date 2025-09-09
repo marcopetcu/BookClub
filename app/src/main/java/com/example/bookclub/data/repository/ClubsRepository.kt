@@ -23,6 +23,8 @@ class ClubsRepository(
     fun listForFollowedBooks(userId: Long): Flow<List<BookClubEntity>> =
         clubDao.listForFollowedBooks(userId)
 
+    fun clubFlow(clubId: Long) = clubDao.getByIdFlow(clubId)
+
     // ✅ NOU: Flow cu setul clubId-urilor unde userul e membru (pentru UI)
     fun membershipsForUser(userId: Long): Flow<Set<Long>> =
         membershipDao.getClubIdsForUser(userId).map { it.toSet() }
@@ -106,6 +108,12 @@ class ClubsRepository(
             }
         }
 
+    suspend fun getClub(id: Long): BookClubEntity? = clubDao.getById(id)
+
+    fun isLive(club: BookClubEntity): Boolean {
+        val now = java.time.Instant.now()
+        return now.isAfter(club.startAt) && now.isBefore(club.closeAt)
+    }
 
     suspend fun addComment(
         clubId: Long,

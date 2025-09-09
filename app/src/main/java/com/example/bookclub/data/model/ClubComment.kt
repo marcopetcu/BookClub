@@ -7,6 +7,6 @@ data class ClubComment(
     val clubId: Long,
     val userId: Long,
     val content: String,
-    val authorName: String,   // <- folosit în UI (nickname/email)
+    val authorName: String?,   // <- folosit în UI (nickname/email)
     val createdAt: Instant
 )

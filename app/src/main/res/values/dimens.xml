@@ -1,4 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- spațiu generic folosit prin layout-uri (inclusiv fragment_register.xml) -->
     <dimen name="default_space">16dp</dimen>
+
+    <!-- comentarii (indent + padding de bază) -->
+    <dimen name="comment_padding_start_base">0dp</dimen>
+    <dimen name="comment_reply_indent">16dp</dimen>
 </resources>

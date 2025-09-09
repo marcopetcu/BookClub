@@ -5,7 +5,7 @@
     android:orientation="vertical"
     android:padding="16dp">
 
-    <!-- HEADER: copertă + titlu carte -->
+    <!-- Header: copertă + titlu -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -39,6 +39,32 @@
         android:layout_weight="1"
         android:padding="4dp" />
 
+    <!-- Reply bar (vizibilă doar când răspunzi) -->
+    <LinearLayout
+        android:id="@+id/replyBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="8dp"
+        android:background="#11000000"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/tvReplyingTo"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textStyle="italic"
+            android:textSize="14sp" />
+
+        <Button
+            android:id="@+id/btnCancelReply"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/cancel" />
+    </LinearLayout>
+
+    <!-- Input -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

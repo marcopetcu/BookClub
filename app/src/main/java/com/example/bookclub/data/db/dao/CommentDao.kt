@@ -7,14 +7,13 @@ import com.example.bookclub.data.db.CommentEntity
 import kotlinx.coroutines.flow.Flow
 import java.time.Instant
 
-// DAO Room pentru Comment: metode CRUD si query-uri specifice
 @Dao
 interface CommentDao {
 
     @Insert
     suspend fun insert(comment: CommentEntity): Long
 
-    // Comentarii top-level + autor (nickname/email)
+    // Top-level + autor (există deja)
     @Query("""
         SELECT 
             c.id            AS id,
@@ -31,16 +30,54 @@ interface CommentDao {
     """)
     fun getTopLevelWithAuthor(clubId: Long): Flow<List<CommentWithAuthor>>
 
+    // ✅ Toate comentariile (inclusiv reply), în ordinea: parent desc, apoi replies asc
+    @Query("""
+        SELECT 
+            c.id            AS id,
+            c.clubId        AS clubId,
+            c.userId        AS userId,
+            c.content       AS content,
+            c.createdAt     AS createdAt,
+            c.parentId      AS parentId,
+            u.nickname      AS authorNickname,
+            u.email         AS authorEmail
+        FROM comment c
+        JOIN user u ON u.id = c.userId
+        WHERE c.clubId = :clubId
+        ORDER BY 
+          CASE WHEN c.parentId IS NULL THEN c.createdAt ELSE (SELECT p.createdAt FROM comment p WHERE p.id = c.parentId) END DESC,
+          CASE WHEN c.parentId IS NULL THEN 0 ELSE 1 END,
+          c.createdAt ASC
+    """)
+    fun getAllWithAuthor(clubId: Long): Flow<List<CommentWithAuthorFull>>
+
     @Query("SELECT * FROM comment WHERE parentId = :parentId ORDER BY createdAt ASC")
     fun getReplies(parentId: Long): Flow<List<CommentEntity>>
 
     @Query("SELECT * FROM comment WHERE id = :id")
     suspend fun getById(id: Long): CommentEntity?
+
+    @Query("""
+    SELECT 
+        c.id            AS id,
+        c.clubId        AS clubId,
+        c.userId        AS userId,
+        c.content       AS content,
+        c.createdAt     AS createdAt,
+        u.nickname      AS authorNickname,
+        u.email         AS authorEmail
+    FROM comment c
+    JOIN user u ON u.id = c.userId
+    WHERE c.parentId = :parentId
+    ORDER BY c.createdAt ASC
+""")
+    suspend fun getRepliesWithAuthor(parentId: Long): List<CommentWithAuthor>
+
+    @Query("SELECT COUNT(*) FROM comment WHERE parentId = :parentId")
+    suspend fun countReplies(parentId: Long): Int
 }
 
-
-
-/** DTO pentru JOIN (Room mapează după numele coloanelor aliate în query). */
+/** DTO-uri pentru JOIN */
 data class CommentWithAuthor(
     val id: Long,
     val clubId: Long,
@@ -48,5 +85,16 @@ data class CommentWithAuthor(
     val content: String,
     val createdAt: Instant,
     val authorNickname: String?,
-    val authorEmail: String
+    val authorEmail: String?
+)
+
+data class CommentWithAuthorFull(
+    val id: Long,
+    val clubId: Long,
+    val userId: Long,
+    val content: String,
+    val createdAt: Instant,
+    val parentId: Long?,           // ✅ important pentru reply
+    val authorNickname: String?,
+    val authorEmail: String?
 )
