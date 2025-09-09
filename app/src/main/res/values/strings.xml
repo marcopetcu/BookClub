@@ -104,4 +104,12 @@
     <string name="cover">Cover</string>
     <string name="profile_picture">Profile picture</string>
     <string name="comments_disabled">Comment disabled</string>
+
+
+    <string name="err_not_logged_in">You need to be logged in to comment.</string>
+    <string name="err_only_members_comment">Only members can comment in this club.</string>
+    <string name="err_club_not_found">Club not found.</string>
+    <string name="err_comment_failed">Could not post your comment.</string>
+
+
 </resources>

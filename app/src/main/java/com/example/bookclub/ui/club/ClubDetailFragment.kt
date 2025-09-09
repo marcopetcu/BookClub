@@ -1,4 +1,3 @@
-// file: app/src/main/java/com/example/bookclub/ui/club/ClubDetailFragment.kt
 package com.example.bookclub.ui.club
 
 import android.os.Bundle
@@ -7,6 +6,7 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -42,6 +42,10 @@ class ClubDetailFragment : Fragment(R.layout.fragment_club_detail) {
     private lateinit var adapter: ThreadedCommentsAdapter
     private var latestParents: List<ClubComment> = emptyList()
 
+    // control acces comentarii
+    private var commentsAllowed: Boolean = false
+    private var notAllowedReason: String? = null
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -71,6 +75,10 @@ class ClubDetailFragment : Fragment(R.layout.fragment_club_detail) {
         val recycler: RecyclerView = view.findViewById(R.id.recyclerComments)
         adapter = ThreadedCommentsAdapter(
             onReplyClick = { comment ->
+                if (!commentsAllowed) {
+                    notAllowedReason?.let { Toast.makeText(requireContext(), it, Toast.LENGTH_SHORT).show() }
+                    return@ThreadedCommentsAdapter
+                }
                 replyTo = comment
                 tvReplyingTo.text = getString(
                     R.string.replying_to_fmt,
@@ -89,50 +97,95 @@ class ClubDetailFragment : Fragment(R.layout.fragment_club_detail) {
         val etComment: EditText = view.findViewById(R.id.etComment)
         val btnSend: Button     = view.findViewById(R.id.btnSend)
 
-        // Toggle UI pentru comentarii
+        // Zone vizibile pentru toggle
         val commentSection: View = view.findViewById(R.id.commentSection)
         val tvCommentsDisabled: TextView = view.findViewById(R.id.tvCommentsDisabled)
 
+        // Stare inițială: le lăsăm vizibile până aflăm regulile
+        commentSection.isVisible = true
+        tvCommentsDisabled.isVisible = false
+        etComment.isEnabled = true
+        btnSend.isEnabled = true
+
         val session = ServiceLocator.sessionManager(requireContext()).get()
-        val currentUserId = session?.userId ?: 1L
         val repo = ServiceLocator.clubsRepository(requireContext())
 
-        var commentsAllowed = false
-
+        // determină dacă poate comenta (logat + membru + club LIVE)
         viewLifecycleOwner.lifecycleScope.launch {
+            val sessionOk = session != null
+            val userId = session?.userId
+
             val club = withContext(Dispatchers.IO) { repo.getClub(args.clubId) }
-            commentsAllowed = club != null &&
+
+            val liveOk = club != null &&
                     club.status == ClubStatus.LIVE &&
                     repo.isLive(club!!)
 
-            commentSection.isVisible = commentsAllowed
-            tvCommentsDisabled.isVisible = !commentsAllowed
+            val memberOk = if (userId != null && club != null) {
+                withContext(Dispatchers.IO) { repo.isMember(userId, club.id) }
+            } else false
 
-            etComment.isEnabled = commentsAllowed
-            btnSend.isEnabled = commentsAllowed
+            commentsAllowed = sessionOk && liveOk && memberOk
+            notAllowedReason = when {
+                !sessionOk -> getString(R.string.err_not_logged_in)
+                club == null -> getString(R.string.err_club_not_found)
+                !liveOk -> getString(R.string.comments_disabled) // “Comments are available only when the club is LIVE.”
+                !memberOk -> getString(R.string.err_only_members_comment)
+                else -> null
+            }
+
+            // Toggle UI în funcție de permisiuni
+            if (commentsAllowed) {
+                commentSection.isVisible = true
+                tvCommentsDisabled.isVisible = false
+                etComment.isEnabled = true
+                btnSend.isEnabled = true
+            } else {
+                commentSection.isVisible = false
+                tvCommentsDisabled.isVisible = true
+                etComment.isEnabled = false
+                btnSend.isEnabled = false
+                clearReply()
+            }
         }
 
         btnSend.setOnClickListener {
-            if (!commentsAllowed) return@setOnClickListener
+            if (!commentsAllowed) {
+                notAllowedReason?.let { msg ->
+                    Toast.makeText(requireContext(), msg, Toast.LENGTH_SHORT).show()
+                }
+                return@setOnClickListener
+            }
 
             val content = etComment.text?.toString()?.trim().orEmpty()
             if (content.isEmpty()) return@setOnClickListener
 
+            val userId = session?.userId
+            if (userId == null) {
+                Toast.makeText(requireContext(), getString(R.string.err_not_logged_in), Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
             val parentId = replyTo?.id
             viewLifecycleOwner.lifecycleScope.launch {
-                vm.addCommentAwait(
-                    clubId = args.clubId,
-                    userId = currentUserId,
-                    content = content,
-                    parentId = parentId
-                )
+                try {
+                    vm.addCommentAwait(
+                        clubId = args.clubId,
+                        userId = userId,
+                        content = content,
+                        parentId = parentId
+                    )
 
-                etComment.text?.clear()
-                clearReply()
+                    etComment.text?.clear()
+                    clearReply()
 
-                if (parentId != null) {
-                    expanded.add(parentId)
-                    refreshReplies(parentId)
+                    if (parentId != null) {
+                        expanded.add(parentId)
+                        refreshReplies(parentId)
+                    }
+                } catch (t: Throwable) {
+                    // arată mesajul de la repo (ex. “Only members…”, “Comments allowed only for LIVE…”)
+                    Toast.makeText(requireContext(), t.message ?: getString(R.string.err_comment_failed), Toast.LENGTH_LONG).show()
                 }
             }
         }
@@ -195,13 +248,11 @@ class ClubDetailFragment : Fragment(R.layout.fragment_club_detail) {
                 repliesCache[parent.id].orEmpty().forEach { child ->
                     items += ThreadItem.Reply(child)
                 }
-            } else {
-                if (count == null) {
-                    viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
-                        val c = vm.countReplies(parent.id)
-                        repliesCount[parent.id] = c
-                        withContext(Dispatchers.Main) { buildAndShowThread() }
-                    }
+            } else if (count == null) {
+                viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
+                    val c = vm.countReplies(parent.id)
+                    repliesCount[parent.id] = c
+                    withContext(Dispatchers.Main) { buildAndShowThread() }
                 }
             }
         }
