@@ -2,8 +2,15 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+
+    <!-- badge-uri -->
     <color name="badgeLive">#FF6F00</color>        <!-- portocaliu -->
     <color name="badgeScheduled">#FFC107</color>   <!-- galben -->
     <color name="badgeClosed">#9E9E9E</color>      <!-- gri -->
-    <color name="badgeTextOn">#FFFFFF</color>
+    <color name="badgeTextOn">#FFFFFFFF</color>
+
+    <!-- pentru selector -->
+    <color name="gray_500">#9E9E9E</color>
+    <color name="purple_500">#6200EE</color>
+    <color name="purple_700">#3700B3</color>
 </resources>
